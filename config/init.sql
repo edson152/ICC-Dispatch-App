@@ -1,6 +1,3 @@
--- ICC Dispatch Management System
--- Run this once on your Railway PostgreSQL database
-
 -- Employees table
 CREATE TABLE IF NOT EXISTS employees (
   id SERIAL PRIMARY KEY,
@@ -73,22 +70,9 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Seed default admin (password: icc2024 - CHANGE THIS!)
--- bcrypt hash of 'icc2024'
-INSERT INTO admins (username, password_hash, full_name, email)
-VALUES (
-  'admin',
-  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh3y',
-  'Administrator',
-  'admin@icc.co.za'
-) ON CONFLICT (username) DO NOTHING;
-
--- Seed 2 employees (PIN: 1234 for both - admin should reset)
--- bcrypt hash of '1234'
-INSERT INTO employees (full_name, role, pin_hash) VALUES
-  ('Patience Khumalo', 'Invoicing', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh3y'),
-  ('Sylvia Mokoena', 'Invoicing', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh3y')
-ON CONFLICT DO NOTHING;
+-- NOTE: Admin and employee passwords are seeded via seed.js (run on server startup)
+-- This avoids hardcoded bcrypt hashes which are environment-dependent.
+-- See seed.js for credentials.
 
 -- Seed sample dispatch records (from your vw_Dispatch view sample)
 INSERT INTO dispatch_records (inv_number, inv_date, order_num, invoiced_by, acc_no, acc_name, email, cust_ord_no, internal_rep, ext_rep, picker, packer, checker, weight, boxes, bales, grey_bags, total_packages, delivery_method, inv_tot_excl)
