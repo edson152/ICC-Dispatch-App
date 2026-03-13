@@ -1,9 +1,9 @@
 -- ICC Dispatch Management System — Database Schema
--- Tables only. Seeding is handled by server.js at startup
+-- Tables only. Seeding handled by server.js at startup
 
 CREATE TABLE IF NOT EXISTS employees (
   id SERIAL PRIMARY KEY,
-  full_name VARCHAR(100) NOT NULL UNIQUE,
+  full_name VARCHAR(100) NOT NULL,
   role VARCHAR(50) NOT NULL DEFAULT 'Employee',
   pin_hash VARCHAR(100) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS admins (
   id SERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   password_hash VARCHAR(100) NOT NULL,
-  full_name VARCHAR(100) NOT NULL UNIQUE,
+  full_name VARCHAR(100) NOT NULL,
   email VARCHAR(100),
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -53,6 +53,18 @@ CREATE TABLE IF NOT EXISTS dispatch_records (
   captured_at TIMESTAMP,
   synced_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS delivery_receipts (
+  id SERIAL PRIMARY KEY,
+  inv_number BIGINT REFERENCES dispatch_records(inv_number) ON DELETE CASCADE,
+  receipt_date DATE NOT NULL DEFAULT CURRENT_DATE,
+  received_by VARCHAR(100),
+  recipient_name VARCHAR(150),
+  condition VARCHAR(50) DEFAULT 'Good',
+  notes TEXT,
+  captured_by VARCHAR(100) NOT NULL,
+  captured_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (

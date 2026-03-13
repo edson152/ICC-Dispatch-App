@@ -5,55 +5,39 @@
     <%- include('../partials/topbar') %>
     <div class="page-body">
 
-      <!-- Stats -->
       <div class="stat-grid">
         <div class="stat-card">
           <div class="stat-icon blue">📦</div>
-          <div>
-            <div class="stat-label">Total Dispatches</div>
-            <div class="stat-value"><%= stats.total %></div>
-          </div>
+          <div><div class="stat-label">Total Dispatches</div><div class="stat-value"><%= stats.total %></div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon green">✅</div>
-          <div>
-            <div class="stat-label">Transport Captured</div>
-            <div class="stat-value"><%= stats.complete %></div>
-          </div>
+          <div><div class="stat-label">Transport Captured</div><div class="stat-value"><%= stats.complete %></div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon orange">⏳</div>
-          <div>
-            <div class="stat-label">Pending Details</div>
-            <div class="stat-value"><%= stats.pending %></div>
-          </div>
+          <div><div class="stat-label">Pending Details</div><div class="stat-value"><%= stats.pending %></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">🧾</div>
+          <div><div class="stat-label">Delivery Receipts</div><div class="stat-value"><%= receiptCount %></div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon light">💰</div>
-          <div>
-            <div class="stat-label">Total Value (Excl)</div>
-            <div class="stat-value">R <%= parseFloat(stats.total_value || 0).toLocaleString('en-ZA', {minimumFractionDigits:2,maximumFractionDigits:2}) %></div>
-          </div>
+          <div><div class="stat-label">Total Value (Excl)</div><div class="stat-value">R <%= parseFloat(stats.total_value || 0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}) %></div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon purple">⚖</div>
-          <div>
-            <div class="stat-label">Total Weight</div>
-            <div class="stat-value"><%= parseFloat(stats.total_weight || 0).toFixed(1) %> kg</div>
-          </div>
+          <div class="stat-icon teal">⚖</div>
+          <div><div class="stat-label">Total Weight</div><div class="stat-value"><%= parseFloat(stats.total_weight || 0).toFixed(1) %> kg</div></div>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
-
-        <!-- By Employee -->
         <div class="card">
           <div class="card-header"><span class="card-title">👤 Top Invoicers</span></div>
           <div class="table-wrapper">
             <table>
-              <thead>
-                <tr><th>Employee</th><th>Invoices</th><th>Value (Excl)</th></tr>
-              </thead>
+              <thead><tr><th>Employee</th><th>Invoices</th><th>Value (Excl)</th></tr></thead>
               <tbody>
                 <% byEmployee.forEach(r => { %>
                   <tr>
@@ -66,15 +50,11 @@
             </table>
           </div>
         </div>
-
-        <!-- By Delivery -->
         <div class="card">
           <div class="card-header"><span class="card-title">🚚 Delivery Methods</span></div>
           <div class="table-wrapper">
             <table>
-              <thead>
-                <tr><th>Method</th><th>Count</th><th>Weight</th></tr>
-              </thead>
+              <thead><tr><th>Method</th><th>Count</th><th>Weight</th></tr></thead>
               <tbody>
                 <% byDelivery.forEach(r => { %>
                   <tr>
@@ -87,10 +67,8 @@
             </table>
           </div>
         </div>
-
       </div>
 
-      <!-- Recent Dispatches -->
       <div class="card">
         <div class="card-header">
           <span class="card-title">📋 Recent Dispatch Activity</span>
@@ -100,17 +78,9 @@
           <table>
             <thead>
               <tr>
-                <th>Invoice #</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Invoiced By</th>
-                <th>Weight</th>
-                <th>Delivery</th>
-                <th>Transport Co.</th>
-                <th>Driver</th>
-                <th>Plate</th>
-                <th>Captured By</th>
-                <th>Status</th>
+                <th>Invoice #</th><th>Date</th><th>Customer</th><th>Invoiced By</th>
+                <th>Weight</th><th>Delivery</th><th>Transport Co.</th><th>Driver</th>
+                <th>Plate</th><th>Captured By</th><th>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -123,10 +93,10 @@
                   <td><%= d.invoiced_by || '—' %></td>
                   <td><%= d.weight ? d.weight + ' kg' : '—' %></td>
                   <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
-                  <td><%= d.transport_company || '<span class="text-muted">—</span>' %></td>
-                  <td><%= d.driver_first_name ? d.driver_first_name + ' ' + d.driver_surname : '<span class="text-muted">—</span>' %></td>
-                  <td><%= d.license_plate || '<span class="text-muted">—</span>' %></td>
-                  <td><%= d.captured_by || '<span class="text-muted">—</span>' %></td>
+                  <td><%= d.transport_company || '—' %></td>
+                  <td><%= d.driver_first_name ? d.driver_first_name + ' ' + d.driver_surname : '—' %></td>
+                  <td><%= d.license_plate || '—' %></td>
+                  <td><%= d.captured_by || '—' %></td>
                   <td><span class="badge <%= done ? 'badge-success' : 'badge-warning' %>"><%= done ? '✔ Done' : '⏳ Pending' %></span></td>
                 </tr>
               <% }) %>

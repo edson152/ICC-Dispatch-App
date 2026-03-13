@@ -1,0 +1,51 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+
+      <div style="margin-bottom:16px;">
+        <a href="/receipts" class="btn btn-outline btn-sm">← Back to Receipts</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🧾 Delivery Receipt #<%= receipt.id %></span>
+          <span class="badge <%= receipt.condition === 'Good' ? 'badge-success' : receipt.condition === 'Damaged' ? 'badge-danger' : 'badge-warning' %>"><%= receipt.condition %></span>
+        </div>
+        <div class="card-body">
+          <div class="section-title">📦 Delivery Information</div>
+          <div class="detail-grid">
+            <div class="detail-field highlight"><label>Invoice #</label><span>#<%= receipt.inv_number %></span></div>
+            <div class="detail-field highlight"><label>Receipt Date</label><span><%= receipt.receipt_date ? new Date(receipt.receipt_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></span></div>
+            <div class="detail-field highlight"><label>Captured By</label><span><%= receipt.captured_by %></span></div>
+            <div class="detail-field" style="grid-column:span 2;"><label>Customer</label><span><%= receipt.acc_name %></span></div>
+            <div class="detail-field"><label>Customer Email</label><span><%= receipt.customer_email || '—' %></span></div>
+            <div class="detail-field"><label>Received By</label><span><%= receipt.received_by || '—' %></span></div>
+            <div class="detail-field"><label>Recipient Name</label><span><%= receipt.recipient_name || '—' %></span></div>
+            <div class="detail-field"><label>Delivery Method</label><span><%= receipt.delivery_method %></span></div>
+            <div class="detail-field"><label>Transport Co.</label><span><%= receipt.transport_company || '—' %></span></div>
+            <div class="detail-field"><label>Tracking #</label><span style="color:var(--medium-blue);font-weight:700;"><%= receipt.tracking_number || '—' %></span></div>
+            <div class="detail-field"><label>Driver</label><span><%= receipt.driver_first_name ? receipt.driver_first_name + ' ' + receipt.driver_surname : '—' %></span></div>
+            <div class="detail-field"><label>License Plate</label><span><%= receipt.license_plate || '—' %></span></div>
+            <div class="detail-field"><label>Packages</label><span><%= receipt.total_packages || '—' %></span></div>
+            <div class="detail-field"><label>Invoice Value</label><span style="color:var(--medium-blue);font-weight:700;">R <%= receipt.inv_tot_excl ? parseFloat(receipt.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></span></div>
+          </div>
+          <% if (receipt.notes) { %>
+            <div style="margin-top:20px;padding:14px 16px;background:rgba(74,144,217,0.07);border-left:4px solid var(--light-blue);border-radius:4px;">
+              <div style="font-size:11px;font-weight:700;color:var(--dark-grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>
+              <p style="margin:0;font-size:14px;"><%= receipt.notes %></p>
+            </div>
+          <% } %>
+          <div style="margin-top:20px;font-size:12px;color:var(--dark-grey);">
+            Captured on <%= receipt.captured_at ? new Date(receipt.captured_at).toLocaleString('en-ZA') : '—' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

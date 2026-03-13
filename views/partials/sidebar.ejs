@@ -1,6 +1,6 @@
 <div class="sidebar">
   <div class="sidebar-logo">
-    <img src="/images/logo.png" alt="ICC Logo" class="sidebar-logo-img">
+    <img src="/images/logo.jpg" alt="ICC Logo" class="sidebar-logo-img">
   </div>
 
   <div class="sidebar-user">
@@ -18,6 +18,9 @@
       <a href="/admin/dispatches" class="nav-item <%= title.includes('Dispatch Records') ? 'active' : '' %>">
         <span class="nav-icon">📦</span> Dispatch Records
       </a>
+      <a href="/admin/receipts" class="nav-item <%= title.includes('Delivery Receipts') ? 'active' : '' %>">
+        <span class="nav-icon">🧾</span> Delivery Receipts
+      </a>
       <div class="nav-section-label">Administration</div>
       <a href="/employees" class="nav-item <%= title.includes('Employee') ? 'active' : '' %>">
         <span class="nav-icon">👥</span> Employees
@@ -32,6 +35,9 @@
       <div class="nav-section-label">Dispatch</div>
       <a href="/dispatch" class="nav-item <%= title.includes('Dispatch Orders') ? 'active' : '' %>">
         <span class="nav-icon">📋</span> Dispatch Orders
+      </a>
+      <a href="/receipts" class="nav-item <%= title.includes('Receipt') ? 'active' : '' %>">
+        <span class="nav-icon">🧾</span> Delivery Receipts
       </a>
     <% } %>
   </nav>

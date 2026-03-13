@@ -1,0 +1,89 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+
+      <div style="margin-bottom:16px;">
+        <a href="/dispatch" class="btn btn-outline btn-sm">← Back to Dispatch Orders</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🧾 Capture Delivery Receipt — Invoice #<%= dispatch.inv_number %></span>
+          <span style="font-size:12px;color:var(--dark-grey);">Captured by: <strong><%= user.name %></strong></span>
+        </div>
+        <div class="card-body">
+
+          <% if (existingId) { %>
+            <div class="alert alert-success" style="margin:0 0 20px;border-radius:8px;">
+              ✅ A receipt already exists for this invoice.
+              <a href="/receipts/view/<%= existingId %>" style="color:var(--medium-blue);font-weight:600;">View it →</a>
+              You can submit below to add another.
+            </div>
+          <% } %>
+
+          <div class="section-title">📄 Invoice Summary</div>
+          <div class="detail-grid" style="margin-bottom:24px;">
+            <div class="detail-field highlight"><label>Invoice #</label><span>#<%= dispatch.inv_number %></span></div>
+            <div class="detail-field highlight"><label>Customer</label><span><%= dispatch.acc_name %></span></div>
+            <div class="detail-field highlight"><label>Customer Email</label><span><%= dispatch.email || '—' %></span></div>
+            <div class="detail-field"><label>Delivery Method</label><span><%= dispatch.delivery_method %></span></div>
+            <div class="detail-field"><label>Transport Co.</label><span><%= dispatch.transport_company || '—' %></span></div>
+            <div class="detail-field"><label>Tracking #</label><span><%= dispatch.tracking_number || '—' %></span></div>
+            <div class="detail-field"><label>Driver</label><span><%= dispatch.driver_first_name ? dispatch.driver_first_name + ' ' + dispatch.driver_surname : '—' %></span></div>
+            <div class="detail-field"><label>License Plate</label><span><%= dispatch.license_plate || '—' %></span></div>
+            <div class="detail-field"><label>Packages</label><span><%= dispatch.total_packages || '—' %></span></div>
+          </div>
+
+          <hr class="section-divider">
+
+          <div class="section-title">🧾 Receipt Details</div>
+          <form method="POST" action="/receipts/new/<%= dispatch.inv_number %>">
+            <div class="form-grid">
+              <div class="form-row">
+                <label class="required">Receipt Date</label>
+                <input class="form-control" type="date" name="receipt_date" value="<%= new Date().toISOString().slice(0,10) %>" required>
+              </div>
+              <div class="form-row">
+                <label class="required">Received By (Person at customer)</label>
+                <input class="form-control" name="received_by" placeholder="Name of person who received the goods" required>
+              </div>
+              <div class="form-row">
+                <label>Recipient Full Name</label>
+                <input class="form-control" name="recipient_name" placeholder="Full name for receipt record">
+              </div>
+              <div class="form-row">
+                <label>Condition of Goods</label>
+                <select class="form-control" name="condition">
+                  <option value="Good">Good — No damage</option>
+                  <option value="Minor Damage">Minor Damage</option>
+                  <option value="Damaged">Damaged</option>
+                  <option value="Partial Delivery">Partial Delivery</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-top:4px;">
+              <label>Notes / Remarks</label>
+              <textarea class="form-control" name="notes" rows="3" placeholder="Any delivery notes, issues, or remarks..."></textarea>
+            </div>
+
+            <div style="background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:14px 16px;margin:20px 0;font-size:13px;color:var(--medium-blue);">
+              📧 <strong>An email will be sent automatically</strong> to <strong><%= dispatch.email || 'the customer' %></strong> with tracking and delivery details once you save.
+            </div>
+
+            <div style="display:flex;gap:12px;">
+              <button type="submit" class="btn btn-blue">🧾 Save Receipt & Notify Customer</button>
+              <a href="/dispatch" class="btn btn-outline">Cancel</a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>
