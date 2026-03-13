@@ -4,9 +4,23 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
 const path = require('path');
+const fs = require('fs');
+const db = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Auto-initialize database tables on startup
+async function initDB() {
+  try {
+    const sql = fs.readFileSync(path.join(__dirname, 'config', 'init.sql'), 'utf8');
+    await db.query(sql);
+    console.log('✅ Database initialized successfully');
+  } catch (err) {
+    console.error('⚠ DB init error (may already exist):', err.message);
+  }
+}
+initDB();
 
 // View engine
 app.set('view engine', 'ejs');

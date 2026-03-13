@@ -141,4 +141,3 @@ Connect to Railway PostgreSQL and run:
 -- Generate hash: node -e "const b=require('bcryptjs');b.hash('yourpassword',10).then(h=>console.log(h))"
 UPDATE admins SET password_hash = '$2a$10$...' WHERE username = 'admin';
 ```
-"# ICC-Dispatch-App" 

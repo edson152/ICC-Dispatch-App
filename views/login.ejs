@@ -6,74 +6,165 @@
     <div class="login-left-content">
       <div class="login-brand">
         <img src="/images/logo.png" alt="ICC Logo" class="login-logo-img">
-        <div class="login-brand-text">
-          <h1>ICC Dispatch</h1>
-          <p>Management System</p>
-        </div>
       </div>
 
       <div class="login-illustration">
-        <svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg" class="truck-svg">
+        <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" class="truck-svg">
+          <!-- Sky / background glow -->
+          <defs>
+            <radialGradient id="skyGlow" cx="60%" cy="40%" r="55%">
+              <stop offset="0%" stop-color="#63B3ED" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#0D2B5E" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="roadGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#0a2040"/>
+              <stop offset="50%" stop-color="#1a3a6a"/>
+              <stop offset="100%" stop-color="#0a2040"/>
+            </linearGradient>
+            <linearGradient id="truckBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563EB"/>
+              <stop offset="100%" stop-color="#1A4A9C"/>
+            </linearGradient>
+            <linearGradient id="cabGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3B82F6"/>
+              <stop offset="100%" stop-color="#1D4ED8"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <rect width="420" height="260" fill="url(#skyGlow)"/>
+
+          <!-- Stars -->
+          <circle cx="30" cy="20" r="1.2" fill="white" opacity="0.6"/>
+          <circle cx="80" cy="40" r="1" fill="white" opacity="0.4"/>
+          <circle cx="150" cy="15" r="1.5" fill="white" opacity="0.5"/>
+          <circle cx="220" cy="30" r="1" fill="white" opacity="0.3"/>
+          <circle cx="300" cy="10" r="1.2" fill="white" opacity="0.6"/>
+          <circle cx="370" cy="35" r="1" fill="white" opacity="0.4"/>
+          <circle cx="390" cy="55" r="1.5" fill="white" opacity="0.3"/>
+
           <!-- Road -->
-          <rect x="0" y="230" width="420" height="50" fill="rgba(255,255,255,0.08)" rx="4"/>
-          <rect x="0" y="248" width="420" height="4" fill="rgba(255,255,255,0.15)" rx="2"/>
-          <!-- Road dashes -->
-          <rect x="20" y="248" width="40" height="4" fill="rgba(255,255,255,0.35)" rx="2"/>
-          <rect x="100" y="248" width="40" height="4" fill="rgba(255,255,255,0.35)" rx="2"/>
-          <rect x="180" y="248" width="40" height="4" fill="rgba(255,255,255,0.35)" rx="2"/>
-          <rect x="260" y="248" width="40" height="4" fill="rgba(255,255,255,0.35)" rx="2"/>
-          <rect x="340" y="248" width="40" height="4" fill="rgba(255,255,255,0.35)" rx="2"/>
+          <rect x="0" y="210" width="420" height="50" fill="url(#roadGrad)" rx="0"/>
+          <!-- Road surface -->
+          <rect x="0" y="210" width="420" height="3" fill="rgba(255,255,255,0.08)"/>
+          <!-- Road markings -->
+          <rect x="10"  y="232" width="50" height="5" fill="rgba(255,255,255,0.25)" rx="3"/>
+          <rect x="90"  y="232" width="50" height="5" fill="rgba(255,255,255,0.25)" rx="3"/>
+          <rect x="170" y="232" width="50" height="5" fill="rgba(255,255,255,0.25)" rx="3"/>
+          <rect x="250" y="232" width="50" height="5" fill="rgba(255,255,255,0.25)" rx="3"/>
+          <rect x="330" y="232" width="50" height="5" fill="rgba(255,255,255,0.25)" rx="3"/>
+          <!-- Road edge lines -->
+          <rect x="0" y="212" width="420" height="2" fill="#F59E0B" opacity="0.5"/>
+          <rect x="0" y="255" width="420" height="2" fill="rgba(255,255,255,0.15)"/>
 
-          <!-- Truck Body -->
-          <rect x="30" y="155" width="220" height="75" fill="rgba(255,255,255,0.18)" rx="6"/>
-          <!-- Truck Cab -->
-          <rect x="250" y="175" width="110" height="55" fill="rgba(255,255,255,0.22)" rx="8"/>
-          <!-- Cab window -->
-          <rect x="263" y="185" width="55" height="32" fill="rgba(99,179,237,0.45)" rx="5"/>
-          <!-- Cab front slope -->
-          <polygon points="320,175 360,195 360,230 320,230" fill="rgba(255,255,255,0.2)"/>
-          <!-- Front window -->
-          <polygon points="324,180 355,200 355,210 324,210" fill="rgba(99,179,237,0.4)"/>
+          <!-- Truck shadow -->
+          <ellipse cx="210" cy="215" rx="180" ry="8" fill="rgba(0,0,0,0.3)"/>
 
-          <!-- ICC Logo on truck side -->
-          <rect x="50" y="170" width="170" height="45" fill="rgba(255,255,255,0.06)" rx="4"/>
-          <text x="135" y="200" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-family="Poppins,sans-serif" font-size="14" font-weight="700" letter-spacing="3">ICC</text>
+          <!-- === TRUCK BODY (cargo) === -->
+          <rect x="20" y="140" width="240" height="72" fill="url(#truckBody)" rx="4"/>
+          <!-- Body highlight -->
+          <rect x="20" y="140" width="240" height="4" fill="rgba(255,255,255,0.25)" rx="4"/>
+          <!-- Body panels / rivets detail -->
+          <rect x="20" y="144" width="240" height="68" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1" rx="3"/>
+          <!-- Vertical panel lines -->
+          <line x1="80"  y1="144" x2="80"  y2="212" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <line x1="140" y1="144" x2="140" y2="212" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <line x1="200" y1="144" x2="200" y2="212" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+          <!-- Rear door handle -->
+          <rect x="24" y="172" width="8" height="20" fill="rgba(255,255,255,0.15)" rx="2"/>
+          <!-- ICC text on side -->
+          <rect x="50" y="160" width="160" height="38" fill="rgba(255,255,255,0.07)" rx="4"/>
+          <text x="130" y="186" text-anchor="middle" fill="rgba(255,255,255,0.9)" font-family="Poppins,sans-serif" font-size="16" font-weight="800" letter-spacing="5">ICC</text>
+          <text x="130" y="198" text-anchor="middle" fill="rgba(255,255,255,0.45)" font-family="Poppins,sans-serif" font-size="7" font-weight="600" letter-spacing="2.5">DISPATCH</text>
 
-          <!-- Wheels -->
-          <circle cx="90" cy="233" r="20" fill="rgba(13,43,94,0.7)" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-          <circle cx="90" cy="233" r="9" fill="rgba(255,255,255,0.2)"/>
-          <circle cx="195" cy="233" r="20" fill="rgba(13,43,94,0.7)" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-          <circle cx="195" cy="233" r="9" fill="rgba(255,255,255,0.2)"/>
-          <circle cx="330" cy="233" r="20" fill="rgba(13,43,94,0.7)" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-          <circle cx="330" cy="233" r="9" fill="rgba(255,255,255,0.2)"/>
+          <!-- === CAB === -->
+          <rect x="260" y="155" width="120" height="57" fill="url(#cabGrad)" rx="6"/>
+          <!-- Cab top highlight -->
+          <rect x="260" y="155" width="120" height="4" fill="rgba(255,255,255,0.3)" rx="4"/>
+          <!-- Windshield -->
+          <rect x="272" y="164" width="68" height="36" fill="#93C5FD" rx="4" opacity="0.85"/>
+          <!-- Windshield glare -->
+          <polygon points="274,166 298,166 276,180" fill="rgba(255,255,255,0.35)"/>
+          <!-- Cab front slant -->
+          <polygon points="340,155 376,175 376,212 340,212" fill="#1E40AF"/>
+          <polygon points="343,158 373,178 373,190 343,170" fill="#60A5FA" opacity="0.6"/>
+          <!-- Side mirror -->
+          <rect x="256" y="164" width="8" height="10" fill="#1D4ED8" rx="2" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
 
-          <!-- Headlight -->
-          <rect x="358" y="210" width="10" height="8" fill="rgba(255,240,120,0.85)" rx="2"/>
-          <!-- Grill -->
-          <rect x="358" y="220" width="10" height="3" fill="rgba(255,255,255,0.3)" rx="1"/>
-          <rect x="358" y="225" width="10" height="3" fill="rgba(255,255,255,0.3)" rx="1"/>
+          <!-- Headlights (glowing) -->
+          <rect x="373" y="195" width="14" height="9" fill="#FCD34D" rx="2" filter="url(#glow)"/>
+          <rect x="373" y="207" width="8" height="4" fill="rgba(255,255,255,0.5)" rx="1"/>
+          <!-- Headlight beam -->
+          <polygon points="387,196 420,185 420,210 387,204" fill="rgba(252,211,77,0.08)"/>
 
-          <!-- Packages in truck -->
-          <rect x="45" y="168" width="30" height="30" fill="rgba(255,255,255,0.12)" rx="3" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-          <rect x="85" y="168" width="30" height="30" fill="rgba(255,255,255,0.12)" rx="3" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-          <rect x="125" y="168" width="30" height="30" fill="rgba(255,255,255,0.12)" rx="3" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <!-- Grille -->
+          <rect x="374" y="175" width="5" height="18" fill="rgba(255,255,255,0.2)" rx="1"/>
+          <rect x="381" y="175" width="5" height="18" fill="rgba(255,255,255,0.2)" rx="1"/>
+
+          <!-- Air intake on top -->
+          <rect x="310" y="142" width="18" height="14" fill="#1E40AF" rx="3"/>
+          <rect x="313" y="140" width="12" height="4" fill="#3B82F6" rx="2"/>
+
+          <!-- === WHEELS === -->
+          <!-- Rear left -->
+          <circle cx="80"  cy="215" r="22" fill="#1a1a2e" stroke="#374151" stroke-width="3"/>
+          <circle cx="80"  cy="215" r="14" fill="#111827" stroke="#4B5563" stroke-width="1.5"/>
+          <circle cx="80"  cy="215" r="5"  fill="#6B7280"/>
+          <!-- Wheel spokes -->
+          <line x1="80" y1="201" x2="80" y2="229" stroke="#4B5563" stroke-width="2"/>
+          <line x1="66" y1="215" x2="94" y2="215" stroke="#4B5563" stroke-width="2"/>
+          <line x1="70" y1="205" x2="90" y2="225" stroke="#4B5563" stroke-width="1.5"/>
+          <line x1="90" y1="205" x2="70" y2="225" stroke="#4B5563" stroke-width="1.5"/>
+          <!-- Tyre shine -->
+          <path d="M68,203 A14,14 0 0,1 92,203" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
+
+          <!-- Rear right -->
+          <circle cx="175" cy="215" r="22" fill="#1a1a2e" stroke="#374151" stroke-width="3"/>
+          <circle cx="175" cy="215" r="14" fill="#111827" stroke="#4B5563" stroke-width="1.5"/>
+          <circle cx="175" cy="215" r="5"  fill="#6B7280"/>
+          <line x1="175" y1="201" x2="175" y2="229" stroke="#4B5563" stroke-width="2"/>
+          <line x1="161" y1="215" x2="189" y2="215" stroke="#4B5563" stroke-width="2"/>
+          <line x1="165" y1="205" x2="185" y2="225" stroke="#4B5563" stroke-width="1.5"/>
+          <line x1="185" y1="205" x2="165" y2="225" stroke="#4B5563" stroke-width="1.5"/>
+          <path d="M163,203 A14,14 0 0,1 187,203" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
+
+          <!-- Front -->
+          <circle cx="330" cy="215" r="22" fill="#1a1a2e" stroke="#374151" stroke-width="3"/>
+          <circle cx="330" cy="215" r="14" fill="#111827" stroke="#4B5563" stroke-width="1.5"/>
+          <circle cx="330" cy="215" r="5"  fill="#6B7280"/>
+          <line x1="330" y1="201" x2="330" y2="229" stroke="#4B5563" stroke-width="2"/>
+          <line x1="316" y1="215" x2="344" y2="215" stroke="#4B5563" stroke-width="2"/>
+          <line x1="320" y1="205" x2="340" y2="225" stroke="#4B5563" stroke-width="1.5"/>
+          <line x1="340" y1="205" x2="320" y2="225" stroke="#4B5563" stroke-width="1.5"/>
+          <path d="M318,203 A14,14 0 0,1 342,203" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none"/>
 
           <!-- Speed lines -->
-          <line x1="0" y1="190" x2="20" y2="190" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"/>
-          <line x1="0" y1="200" x2="15" y2="200" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="0" y1="210" x2="10" y2="210" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-linecap="round"/>
+          <line x1="0" y1="168" x2="16" y2="168" stroke="rgba(99,179,237,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="0" y1="180" x2="10" y2="180" stroke="rgba(99,179,237,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="0" y1="192" x2="7"  y2="192" stroke="rgba(99,179,237,0.2)" stroke-width="1"   stroke-linecap="round"/>
 
-          <!-- Tracking dots -->
-          <circle cx="200" cy="100" r="5" fill="rgba(99,179,237,0.8)"/>
-          <circle cx="240" cy="80" r="4" fill="rgba(99,179,237,0.5)"/>
-          <circle cx="280" cy="60" r="3" fill="rgba(99,179,237,0.3)"/>
-          <line x1="200" y1="100" x2="240" y2="80" stroke="rgba(99,179,237,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
-          <line x1="240" y1="80" x2="280" y2="60" stroke="rgba(99,179,237,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <!-- GPS tracking pin above truck -->
+          <circle cx="210" cy="95" r="18" fill="rgba(99,179,237,0.15)" stroke="rgba(99,179,237,0.5)" stroke-width="1.5"/>
+          <circle cx="210" cy="95" r="7" fill="#63B3ED" filter="url(#glow)"/>
+          <circle cx="210" cy="95" r="3" fill="white"/>
+          <!-- Pin tail -->
+          <line x1="210" y1="102" x2="210" y2="140" stroke="rgba(99,179,237,0.6)" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <!-- Trailing dots -->
+          <circle cx="250" cy="78" r="4" fill="rgba(99,179,237,0.5)"/>
+          <circle cx="290" cy="62" r="3" fill="rgba(99,179,237,0.3)"/>
+          <line x1="210" y1="95" x2="250" y2="78" stroke="rgba(99,179,237,0.35)" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <line x1="250" y1="78" x2="290" y2="62" stroke="rgba(99,179,237,0.2)" stroke-width="1.5" stroke-dasharray="5,4"/>
 
-          <!-- Pin marker -->
-          <circle cx="200" cy="85" r="14" fill="rgba(99,179,237,0.25)" stroke="rgba(99,179,237,0.6)" stroke-width="1.5"/>
-          <circle cx="200" cy="85" r="5" fill="rgba(99,179,237,0.9)"/>
-          <line x1="200" y1="90" x2="200" y2="100" stroke="rgba(99,179,237,0.7)" stroke-width="2"/>
+          <!-- Packages floating / being loaded -->
+          <rect x="355" y="120" width="28" height="28" fill="#F59E0B" rx="4" opacity="0.9"/>
+          <line x1="355" y1="134" x2="383" y2="134" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <line x1="369" y1="120" x2="369" y2="148" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <rect x="390" y="100" width="22" height="22" fill="#34D399" rx="3" opacity="0.85"/>
+          <line x1="390" y1="111" x2="412" y2="111" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+          <line x1="401" y1="100" x2="401" y2="122" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
         </svg>
       </div>
 
@@ -133,7 +224,7 @@
       </form>
 
       <div class="login-footer">
-        <span>ICC_BI · Dispatch Management System</span>
+        <span>Dispatch Management System</span>
       </div>
     </div>
   </div>
