@@ -1,7 +1,9 @@
--- Employees table
+-- ICC Dispatch Management System — Database Schema
+-- Tables only. Seeding is handled by server.js at startup
+
 CREATE TABLE IF NOT EXISTS employees (
   id SERIAL PRIMARY KEY,
-  full_name VARCHAR(100) NOT NULL,
+  full_name VARCHAR(100) NOT NULL UNIQUE,
   role VARCHAR(50) NOT NULL DEFAULT 'Employee',
   pin_hash VARCHAR(100) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
@@ -9,21 +11,17 @@ CREATE TABLE IF NOT EXISTS employees (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Admin users table
 CREATE TABLE IF NOT EXISTS admins (
   id SERIAL PRIMARY KEY,
   username VARCHAR(50) UNIQUE NOT NULL,
   password_hash VARCHAR(100) NOT NULL,
-  full_name VARCHAR(100) NOT NULL,
+  full_name VARCHAR(100) NOT NULL UNIQUE,
   email VARCHAR(100),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Dispatch records table (mirrors vw_Dispatch + added transport fields)
 CREATE TABLE IF NOT EXISTS dispatch_records (
   id SERIAL PRIMARY KEY,
-
-  -- From ICC_BI vw_Dispatch view
   inv_number BIGINT UNIQUE NOT NULL,
   inv_date DATE,
   order_num VARCHAR(50),
@@ -45,8 +43,6 @@ CREATE TABLE IF NOT EXISTS dispatch_records (
   total_packages VARCHAR(255),
   delivery_method VARCHAR(100),
   inv_tot_excl DECIMAL(12,2),
-
-  -- Transport details (captured by dispatch staff)
   transport_company VARCHAR(150),
   driver_first_name VARCHAR(100),
   driver_surname VARCHAR(100),
@@ -55,12 +51,10 @@ CREATE TABLE IF NOT EXISTS dispatch_records (
   notes TEXT,
   captured_by VARCHAR(100),
   captured_at TIMESTAMP,
-
   synced_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Audit log
 CREATE TABLE IF NOT EXISTS audit_log (
   id SERIAL PRIMARY KEY,
   user_name VARCHAR(100),
@@ -69,17 +63,3 @@ CREATE TABLE IF NOT EXISTS audit_log (
   detail TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
-
--- NOTE: Admin and employee passwords are seeded via seed.js (run on server startup)
--- This avoids hardcoded bcrypt hashes which are environment-dependent.
--- See seed.js for credentials.
-
--- Seed sample dispatch records (from your vw_Dispatch view sample)
-INSERT INTO dispatch_records (inv_number, inv_date, order_num, invoiced_by, acc_no, acc_name, email, cust_ord_no, internal_rep, ext_rep, picker, packer, checker, weight, boxes, bales, grey_bags, total_packages, delivery_method, inv_tot_excl)
-VALUES
-  (776691, '2026-02-27', '629496', 'Patience', 'AMO001', 'AMODSONS WESTRAND (PTY) LTD T/A AMOD & SONS', 'amodandsons@gmail.com', 'ISMAIL', 'Shenaaz Hortense', 'Grace Pretorius', 'Thando', 'Shirley', 'Alfred', 18.8, 0, 1, 0, '0 Boxes; 1 Bales; 0 GreyBags', 'ICC Truck', 6657.80),
-  (773111, '2026-02-05', '626343', 'Sylvia', 'APO001', 'BRAKKEFONTEIN CLAY PRODUCTS T/A APOLLO BRICK', 'storesabg@apollobrick.com', '319743', 'Joyce Chauke', 'Pindile Malema', NULL, NULL, 'NotChecked', 0, 0, 0, 0, '0 Boxes; 0 Bales; 0 GreyBags', 'ICC Truck', 6456.00),
-  (775329, '2026-02-19', '628346', 'Samkeliso', 'CKE001', 'NELSPORTS CC T/A CK EMBROIDERY - CASH ACC', 'ckreception@global.co.za', 'PO-0059/02', 'Joyce Chauke', 'Vusi Khumalo', 'Mlungisi', 'Tapelo', 'Michael', 17.5, 2, 0, 0, '2 Boxes; 0 Bales; 0 GreyBags', 'ICC Truck', 5018.20),
-  (777001, '2026-03-01', '630100', 'Patience', 'TXA001', 'TEXTILE AFRICA (PTY) LTD', 'orders@texafrica.co.za', 'TA-20260301', 'Shenaaz Hortense', 'Lerato Nkosi', 'Thando', 'Shirley', 'Alfred', 32.4, 4, 2, 0, '4 Boxes; 2 Bales; 0 GreyBags', 'Courier', 12450.00),
-  (777250, '2026-03-05', '630380', 'Samkeliso', 'MAR002', 'MARKHAMS RETAIL GROUP', 'dispatch@markhams.co.za', 'MRK-6610', 'Joyce Chauke', 'Bongani Sithole', 'Grace Pretorius', 'Tapelo', 'Michael', 11.2, 1, 0, 2, '1 Boxes; 0 Bales; 2 GreyBags', 'Collection', 3780.50)
-ON CONFLICT (inv_number) DO NOTHING;
