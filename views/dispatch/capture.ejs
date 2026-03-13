@@ -1,0 +1,153 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+
+      <div style="margin-bottom:16px;">
+        <a href="/dispatch" class="btn btn-outline btn-sm">← Back to Dispatch Orders</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📝 Capture Transport Details — Invoice #<%= dispatch.inv_number %></span>
+          <span style="font-size:12px;color:var(--dark-grey);">Captured by: <strong><%= user.name %></strong></span>
+        </div>
+        <div class="card-body">
+
+          <!-- Invoice Info -->
+          <div class="section-title">📄 Invoice Information</div>
+          <div class="detail-grid">
+            <div class="detail-field highlight">
+              <label>Invoice #</label>
+              <span>#<%= dispatch.inv_number %></span>
+            </div>
+            <div class="detail-field highlight">
+              <label>Date</label>
+              <span><%= dispatch.inv_date ? new Date(dispatch.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></span>
+            </div>
+            <div class="detail-field highlight">
+              <label>Order #</label>
+              <span><%= dispatch.order_num || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Account No</label>
+              <span><%= dispatch.acc_no || '—' %></span>
+            </div>
+            <div class="detail-field" style="grid-column:span 2;">
+              <label>Customer Name</label>
+              <span><%= dispatch.acc_name || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Email</label>
+              <span><%= dispatch.email || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Customer Order No</label>
+              <span><%= dispatch.cust_ord_no || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Delivery Method</label>
+              <span><span class="badge badge-info"><%= dispatch.delivery_method %></span></span>
+            </div>
+            <div class="detail-field">
+              <label>Invoiced By</label>
+              <span><%= dispatch.invoiced_by || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Internal Rep</label>
+              <span><%= dispatch.internal_rep || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Ext Rep</label>
+              <span><%= dispatch.ext_rep || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Picker</label>
+              <span><%= dispatch.picker || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Packer</label>
+              <span><%= dispatch.packer || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Checker</label>
+              <span><%= dispatch.checker || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Weight</label>
+              <span><%= dispatch.weight ? dispatch.weight + ' kg' : '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Boxes</label>
+              <span><%= dispatch.boxes || 0 %></span>
+            </div>
+            <div class="detail-field">
+              <label>Bales</label>
+              <span><%= dispatch.bales || 0 %></span>
+            </div>
+            <div class="detail-field" style="grid-column:span 2;">
+              <label>Total Packages</label>
+              <span><%= dispatch.total_packages || '—' %></span>
+            </div>
+            <div class="detail-field">
+              <label>Invoice Total (Excl)</label>
+              <span style="color:var(--medium-blue);font-weight:700;">R <%= dispatch.inv_tot_excl ? parseFloat(dispatch.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></span>
+            </div>
+          </div>
+
+          <hr class="section-divider">
+
+          <!-- Transport Form -->
+          <div class="section-title">🚛 Transport / Courier Details</div>
+          <form method="POST" action="/dispatch/capture/<%= dispatch.inv_number %>">
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Transport / Courier Company</label>
+                <input class="form-control" name="transport_company" value="<%= dispatch.transport_company || '' %>" placeholder="e.g. DHL, Fastway, ICC Truck">
+              </div>
+              <div class="form-row">
+                <label>Driver First Name</label>
+                <input class="form-control" name="driver_first_name" value="<%= dispatch.driver_first_name || '' %>" placeholder="Driver's first name">
+              </div>
+              <div class="form-row">
+                <label>Driver Surname</label>
+                <input class="form-control" name="driver_surname" value="<%= dispatch.driver_surname || '' %>" placeholder="Driver's surname">
+              </div>
+              <div class="form-row">
+                <label>License Plate</label>
+                <input class="form-control" name="license_plate" value="<%= dispatch.license_plate || '' %>" placeholder="e.g. ABC 123 GP" style="text-transform:uppercase;">
+              </div>
+              <div class="form-row">
+                <label>Tracking / Waybill Number</label>
+                <input class="form-control" name="tracking_number" value="<%= dispatch.tracking_number || '' %>" placeholder="Enter tracking or waybill number">
+              </div>
+              <div class="form-row">
+                <label>Notes</label>
+                <input class="form-control" name="notes" value="<%= dispatch.notes || '' %>" placeholder="Any additional notes">
+              </div>
+            </div>
+
+            <% if (dispatch.captured_by) { %>
+              <div style="background:var(--soft-grey);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--dark-grey);">
+                Previously captured by <strong><%= dispatch.captured_by %></strong>
+                <% if (dispatch.captured_at) { %> on <%= new Date(dispatch.captured_at).toLocaleString('en-ZA') %><% } %>
+              </div>
+            <% } %>
+
+            <div style="display:flex;gap:12px;">
+              <button type="submit" class="btn btn-blue">💾 Save & Notify Admin</button>
+              <a href="/dispatch" class="btn btn-outline">Cancel</a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

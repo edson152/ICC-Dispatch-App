@@ -1,0 +1,105 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+
+      <form method="GET" action="/admin/dispatches" class="filter-bar">
+        <div class="search-wrap">
+          <input class="search-input" type="text" name="search" value="<%= search %>" placeholder="Search invoice, customer, transport company...">
+        </div>
+        <select class="form-control" name="delivery" style="width:auto;">
+          <option value="">All Delivery Methods</option>
+          <option value="ICC Truck" <%= delivery==='ICC Truck'?'selected':'' %>>ICC Truck</option>
+          <option value="Courier" <%= delivery==='Courier'?'selected':'' %>>Courier</option>
+          <option value="Collection" <%= delivery==='Collection'?'selected':'' %>>Collection</option>
+        </select>
+        <select class="form-control" name="status" style="width:auto;">
+          <option value="">All Statuses</option>
+          <option value="pending" <%= status==='pending'?'selected':'' %>>Pending</option>
+          <option value="complete" <%= status==='complete'?'selected':'' %>>Complete</option>
+        </select>
+        <button type="submit" class="btn btn-blue btn-sm">Search</button>
+        <a href="/admin/dispatches" class="btn btn-outline btn-sm">Clear</a>
+        <a href="/admin/export" class="btn btn-success btn-sm">⬇ Export CSV</a>
+      </form>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📦 All Dispatch Records (<%= dispatches.length %>)</span>
+        </div>
+        <div class="table-wrapper" style="overflow-x:auto;">
+          <table style="min-width:1400px;">
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Date</th>
+                <th>Order #</th>
+                <th>Acc No</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Invoiced By</th>
+                <th>Int Rep</th>
+                <th>Ext Rep</th>
+                <th>Picker</th>
+                <th>Packer</th>
+                <th>Checker</th>
+                <th>Weight</th>
+                <th>Boxes</th>
+                <th>Bales</th>
+                <th>Packages</th>
+                <th>Delivery</th>
+                <th>Transport Co.</th>
+                <th>Driver</th>
+                <th>Plate</th>
+                <th>Tracking</th>
+                <th>Total (Excl)</th>
+                <th>Captured By</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% dispatches.forEach(d => { %>
+                <% const done = d.transport_company && d.transport_company.trim() !== ''; %>
+                <tr>
+                  <td><strong style="color:var(--deep-blue)">#<%= d.inv_number %></strong></td>
+                  <td class="nowrap"><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
+                  <td><%= d.order_num || '—' %></td>
+                  <td><%= d.acc_no || '—' %></td>
+                  <td class="truncate" style="max-width:160px;" title="<%= d.acc_name %>"><%= d.acc_name %></td>
+                  <td class="small text-muted"><%= d.email || '—' %></td>
+                  <td><%= d.invoiced_by || '—' %></td>
+                  <td><%= d.internal_rep || '—' %></td>
+                  <td><%= d.ext_rep || '—' %></td>
+                  <td><%= d.picker || '—' %></td>
+                  <td><%= d.packer || '—' %></td>
+                  <td><%= d.checker || '—' %></td>
+                  <td><%= d.weight ? d.weight + ' kg' : '—' %></td>
+                  <td><%= d.boxes || 0 %></td>
+                  <td><%= d.bales || 0 %></td>
+                  <td class="small"><%= d.total_packages || '—' %></td>
+                  <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
+                  <td><strong><%= d.transport_company || '<span class="text-muted">—</span>' %></strong></td>
+                  <td class="nowrap"><%= d.driver_first_name ? d.driver_first_name + ' ' + d.driver_surname : '<span class="text-muted">—</span>' %></td>
+                  <td><%= d.license_plate || '<span class="text-muted">—</span>' %></td>
+                  <td class="small"><%= d.tracking_number || '<span class="text-muted">—</span>' %></td>
+                  <td class="nowrap"><strong style="color:var(--medium-blue)">R <%= d.inv_tot_excl ? parseFloat(d.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></strong></td>
+                  <td><%= d.captured_by || '<span class="text-muted">—</span>' %></td>
+                  <td><span class="badge <%= done ? 'badge-success' : 'badge-warning' %>"><%= done ? '✔' : '⏳' %></span></td>
+                </tr>
+              <% }) %>
+              <% if (dispatches.length === 0) { %>
+                <tr><td colspan="24" style="text-align:center;padding:40px;color:var(--dark-grey);">No records found.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

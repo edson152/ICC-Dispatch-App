@@ -1,0 +1,149 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+
+      <div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+        <button class="btn btn-blue" onclick="openModal('addEmpModal')">➕ Add Employee</button>
+        <button class="btn btn-outline" onclick="openModal('importModal')">📥 Import CSV</button>
+      </div>
+
+      <div class="employee-grid">
+        <% employees.forEach(emp => { %>
+          <div class="employee-card <%= !emp.is_active ? 'inactive' : '' %>">
+            <div class="emp-avatar"><%= emp.full_name.charAt(0).toUpperCase() %></div>
+            <div class="emp-info">
+              <div class="emp-name"><%= emp.full_name %></div>
+              <div class="emp-role"><%= emp.role %></div>
+              <% if (!emp.is_active) { %><span class="badge badge-danger" style="margin-top:4px;">Inactive</span><% } %>
+            </div>
+            <div class="emp-actions">
+              <button class="btn btn-sm btn-outline" title="Reset PIN" onclick="openResetPin(<%= emp.id %>, '<%= emp.full_name.replace(/'/g, "\\'") %>')">🔑</button>
+              <form method="POST" action="/employees/toggle/<%= emp.id %>" style="display:inline;">
+                <button type="submit" class="btn btn-sm <%= emp.is_active ? 'btn-warning' : 'btn-success' %>" title="<%= emp.is_active ? 'Deactivate' : 'Activate' %>">
+                  <%= emp.is_active ? '⏸' : '▶' %>
+                </button>
+              </form>
+              <form method="POST" action="/employees/delete/<%= emp.id %>" style="display:inline;" onsubmit="return confirm('Remove <%= emp.full_name %>?')">
+                <button type="submit" class="btn btn-sm btn-danger" title="Remove">✕</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+        <% if (employees.length === 0) { %>
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--dark-grey);">No employees found. Add one above.</div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal-overlay" id="addEmpModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div class="modal-title">➕ Add New Employee</div>
+      <button class="btn-close" onclick="closeModal('addEmpModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/employees/add">
+        <div class="form-row">
+          <label class="required">Full Name</label>
+          <input class="form-control" name="full_name" placeholder="First and Last name" required>
+        </div>
+        <div class="form-row">
+          <label>Role</label>
+          <select class="form-control" name="role">
+            <option>Invoicing</option>
+            <option>Picker</option>
+            <option>Packer</option>
+            <option>Checker</option>
+            <option>Dispatcher</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="required">4-Digit PIN</label>
+          <input class="form-control pin-input" name="pin" type="password" maxlength="4"
+            placeholder="••••" pattern="\d{4}" inputmode="numeric" required
+            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-blue">✔ Save Employee</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('addEmpModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Reset PIN Modal -->
+<div class="modal-overlay" id="resetPinModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">🔑 Reset PIN</div>
+        <div class="modal-subtitle" id="resetPinName"></div>
+      </div>
+      <button class="btn-close" onclick="closeModal('resetPinModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" id="resetPinForm">
+        <div class="form-row">
+          <label class="required">New 4-Digit PIN</label>
+          <input class="form-control pin-input" name="new_pin" type="password" maxlength="4"
+            placeholder="••••" pattern="\d{4}" inputmode="numeric" required
+            oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-blue">Reset PIN</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('resetPinModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <div class="modal-title">📥 Import Employees from CSV</div>
+      <button class="btn-close" onclick="closeModal('importModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(74,144,217,0.08);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;">
+        <strong>CSV Format:</strong><br>
+        <code>Name, Role, PIN</code><br>
+        <span style="color:var(--dark-grey);">PIN is optional — defaults to <strong>1234</strong> if not provided.</span>
+      </div>
+      <form method="POST" action="/employees/import" enctype="multipart/form-data">
+        <div class="dropzone" onclick="document.getElementById('csvFile').click()">
+          <div style="font-size:36px;margin-bottom:10px;">📄</div>
+          <p>Drop CSV file here or <span style="color:var(--light-blue);font-weight:600;">click to browse</span></p>
+          <p style="font-size:12px;color:var(--dark-grey);margin-top:6px;" id="csvFileName">No file selected</p>
+        </div>
+        <input type="file" id="csvFile" name="csv_file" accept=".csv" style="display:none;"
+          onchange="document.getElementById('csvFileName').textContent = this.files[0]?.name || 'No file selected'">
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button type="submit" class="btn btn-blue">📥 Import</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('importModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  function openResetPin(id, name) {
+    document.getElementById('resetPinName').textContent = name;
+    document.getElementById('resetPinForm').action = '/employees/reset-pin/' + id;
+    openModal('resetPinModal');
+  }
+</script>
+</body>
+</html>

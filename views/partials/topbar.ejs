@@ -1,0 +1,14 @@
+<div class="topbar">
+  <div class="topbar-title"><%= title %></div>
+  <div class="topbar-right">
+    <div class="topbar-datetime" id="topbarClock"></div>
+    <div class="topbar-db">ICC_BI · vw_Dispatch</div>
+  </div>
+</div>
+
+<% if (success && success.length > 0) { %>
+  <div class="alert alert-success"><span>✅</span> <%= success[0] %></div>
+<% } %>
+<% if (error && error.length > 0) { %>
+  <div class="alert alert-error"><span>⚠</span> <%= error[0] %></div>
+<% } %>

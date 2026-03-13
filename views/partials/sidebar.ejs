@@ -1,0 +1,47 @@
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <img src="/images/logo.png" alt="ICC Logo" class="sidebar-logo-img">
+    <div class="sidebar-logo-text">
+      <span class="sidebar-sys">Dispatch System</span>
+    </div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-role"><%= user.role === 'admin' ? '⚙ Administrator' : '👤 ' + user.empRole %></div>
+    <div class="user-name"><%= user.name %></div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <% if (user.role === 'admin') { %>
+      <div class="nav-section-label">Overview</div>
+      <a href="/admin/dashboard" class="nav-item <%= title.includes('Dashboard') ? 'active' : '' %>">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <div class="nav-section-label">Operations</div>
+      <a href="/admin/dispatches" class="nav-item <%= title.includes('Dispatch Records') ? 'active' : '' %>">
+        <span class="nav-icon">📦</span> Dispatch Records
+      </a>
+      <div class="nav-section-label">Administration</div>
+      <a href="/employees" class="nav-item <%= title.includes('Employee') ? 'active' : '' %>">
+        <span class="nav-icon">👥</span> Employees
+      </a>
+      <a href="/admin/reports" class="nav-item <%= title.includes('Reports') ? 'active' : '' %>">
+        <span class="nav-icon">📈</span> Reports
+      </a>
+      <a href="/admin/export" class="nav-item">
+        <span class="nav-icon">⬇</span> Export CSV
+      </a>
+    <% } else { %>
+      <div class="nav-section-label">Dispatch</div>
+      <a href="/dispatch" class="nav-item <%= title.includes('Dispatch Orders') ? 'active' : '' %>">
+        <span class="nav-icon">📋</span> Dispatch Orders
+      </a>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-footer">
+    <form method="POST" action="/logout">
+      <button type="submit" class="btn-logout">⬅ Sign Out</button>
+    </form>
+  </div>
+</div>
