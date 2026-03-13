@@ -7,47 +7,46 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const db = require('./config/db');
-
+ 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Auto-initialize database on startup
+ 
 async function initDB() {
   try {
     // Create tables
     const sql = fs.readFileSync(path.join(__dirname, 'config', 'init.sql'), 'utf8');
     await db.query(sql);
     console.log('✅ Tables ready');
-
-    // Generate fresh hashes at runtime — avoids any hardcoded hash issues
+ 
+    // Generate fresh hashes at runtime
     const adminPassword = process.env.ADMIN_PASSWORD || 'icc2024';
     const adminHash = await bcrypt.hash(adminPassword, 10);
     const pinHash   = await bcrypt.hash('1234', 10);
-
-    // Upsert admin — DO UPDATE ensures hash is always correct
+ 
+    // Force-upsert admin using ON CONFLICT on username (has UNIQUE constraint)
     await db.query(`
       INSERT INTO admins (username, password_hash, full_name, email)
       VALUES ('admin', $1, 'Administrator', 'admin@icc.co.za')
-      ON CONFLICT (username) DO UPDATE
-        SET password_hash = EXCLUDED.password_hash
+      ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash
     `, [adminHash]);
     console.log('✅ Admin ready  |  username: admin  |  password: ' + adminPassword);
-
-    // Upsert 2 seed employees — DO UPDATE ensures PIN hash is always correct
-    const employees = [
-      ['Patience Khumalo', 'Invoicing'],
-      ['Sylvia Mokoena',   'Invoicing']
-    ];
-    for (const [name, role] of employees) {
+ 
+    // For employees: if none exist, insert seed. Otherwise update all hashes.
+    const empCount = await db.query('SELECT COUNT(*) FROM employees');
+    if (parseInt(empCount.rows[0].count) === 0) {
       await db.query(`
-        INSERT INTO employees (full_name, role, pin_hash)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (full_name) DO UPDATE SET pin_hash = EXCLUDED.pin_hash
-      `, [name, role, pinHash]);
+        INSERT INTO employees (full_name, role, pin_hash) VALUES
+          ('Patience Khumalo', 'Invoicing', $1),
+          ('Sylvia Mokoena',   'Invoicing', $1)
+      `, [pinHash]);
+      console.log('✅ Seed employees inserted  |  PIN: 1234');
+    } else {
+      // Always update ALL employee hashes so PIN 1234 is guaranteed to work
+      await db.query('UPDATE employees SET pin_hash = $1', [pinHash]);
+      console.log('✅ Employee PINs refreshed  |  PIN: 1234');
     }
-    console.log('✅ Seed employees ready  |  PIN: 1234');
-
-    // Seed sample dispatch records (skip if already exist)
+ 
+    // Seed sample dispatch records
     await db.query(`
       INSERT INTO dispatch_records
         (inv_number,inv_date,order_num,invoiced_by,acc_no,acc_name,email,cust_ord_no,
@@ -61,29 +60,29 @@ async function initDB() {
         (777250,'2026-03-05','630380','Samkeliso','MAR002','MARKHAMS RETAIL GROUP','dispatch@markhams.co.za','MRK-6610','Joyce Chauke','Bongani Sithole','Grace Pretorius','Tapelo','Michael',11.2,1,0,2,'1 Boxes; 0 Bales; 2 GreyBags','Collection',3780.50)
       ON CONFLICT (inv_number) DO NOTHING
     `);
-    console.log('✅ Sample dispatch records ready');
-
+    console.log('✅ Dispatch records ready');
+ 
   } catch (err) {
     console.error('❌ DB init error:', err.message);
   }
 }
 initDB();
-
+ 
 // View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
+ 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
-
+ 
 // Body parsing
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride('_method'));
-
+ 
 // Trust Railway's proxy
 app.set('trust proxy', 1);
-
+ 
 // Session
 app.use(session({
   secret: process.env.SESSION_SECRET || 'icc_secret_2024',
@@ -95,28 +94,26 @@ app.use(session({
     maxAge: 8 * 60 * 60 * 1000
   }
 }));
-
+ 
 app.use(flash());
-
-// Locals middleware
+ 
 app.use((req, res, next) => {
   res.locals.user    = req.session.user || null;
   res.locals.success = req.flash('success');
   res.locals.error   = req.flash('error');
   next();
 });
-
-// Routes
+ 
 app.use('/',          require('./routes/auth'));
 app.use('/dispatch',  require('./routes/dispatch'));
 app.use('/admin',     require('./routes/admin'));
 app.use('/employees', require('./routes/employees'));
-
-// 404
+ 
 app.use((req, res) => {
   res.status(404).render('404', { title: '404 - Page Not Found' });
 });
-
+ 
 app.listen(PORT, () => {
   console.log(`🚚 ICC Dispatch running on port ${PORT}`);
 });
+ 
