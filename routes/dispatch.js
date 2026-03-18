@@ -60,8 +60,8 @@ router.post('/new', requireAuth, async (req, res) => {
   const boxes_n = parseInt(boxes) || 0, bales_n = parseInt(bales) || 0, bags_n = parseInt(grey_bags) || 0;
   const total_packages = `${boxes_n} Boxes; ${bales_n} Bales; ${bags_n} GreyBags`;
   try {
-    await db.query(`INSERT INTO dispatch_records (inv_number,inv_date,order_num,invoiced_by,acc_no,acc_name,email,cust_ord_no,internal_rep,ext_rep,picker,packer,packer2,checker,weight,boxes,bales,grey_bags,total_packages,delivery_method,inv_tot_excl,notes,captured_by,captured_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,NOW())`,
-      [inv_number, inv_date, order_num, capturedBy, acc_no, acc_name, email, cust_ord_no, internal_rep, ext_rep, picker, packer, packer2, checker, parseFloat(weight)||0, boxes_n, bales_n, bags_n, total_packages, delivery_method, parseFloat(inv_tot_excl)||0, notes]);
+    await db.query(`INSERT INTO dispatch_records (inv_number,inv_date,order_num,invoiced_by,acc_no,acc_name,email,cust_ord_no,internal_rep,ext_rep,picker,packer,packer2,checker,weight,boxes,bales,grey_bags,total_packages,delivery_method,inv_tot_excl,notes,captured_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)`,
+      [inv_number, inv_date, order_num, capturedBy, acc_no, acc_name, email, cust_ord_no, internal_rep, ext_rep, picker, packer, packer2, checker, parseFloat(weight)||0, boxes_n, bales_n, bags_n, total_packages, delivery_method, parseFloat(inv_tot_excl)||0, notes, capturedBy]);
     await db.query('INSERT INTO audit_log (user_name, user_role, action, detail) VALUES ($1,$2,$3,$4)', [capturedBy, req.session.user.role, 'CREATE_INVOICE', `New invoice #${inv_number} created by ${capturedBy}`]);
     req.flash('success', `Invoice #${inv_number} created successfully. You can now upload goods photos.`);
     res.redirect(`/dispatch/capture/${inv_number}`);
