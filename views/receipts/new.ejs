@@ -12,9 +12,14 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">🧾 Capture Delivery Receipt — Invoice #<%= dispatch.inv_number %></span>
-          <span style="font-size:12px;color:var(--dark-grey);">Captured by: <strong><%= user.name %></strong></span>
+          <span style="font-size:12px;color:var(--dark-grey);">Captured by: <strong style="color:var(--medium-blue);"><%= user.name %></strong></span>
         </div>
         <div class="card-body">
+
+          <!-- Auto-capturer banner -->
+          <div style="background:linear-gradient(135deg,#EBF8FF,#E6FFFA);border:1px solid #90CDF4;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#2b6cb0;">
+            📋 <strong>Capturer:</strong> <strong style="color:var(--deep-blue);"><%= user.name %></strong> — automatically logged on this receipt.
+          </div>
 
           <% if (existingId) { %>
             <div class="alert alert-success" style="margin:0 0 20px;border-radius:8px;">
@@ -40,7 +45,7 @@
           <hr class="section-divider">
 
           <div class="section-title">🧾 Receipt Details</div>
-          <form method="POST" action="/receipts/new/<%= dispatch.inv_number %>">
+          <form method="POST" action="/receipts/new/<%= dispatch.inv_number %>" enctype="multipart/form-data">
             <div class="form-grid">
               <div class="form-row">
                 <label class="required">Receipt Date</label>
@@ -61,6 +66,8 @@
                   <option value="Minor Damage">Minor Damage</option>
                   <option value="Damaged">Damaged</option>
                   <option value="Partial Delivery">Partial Delivery</option>
+                  <option value="Missing Items">Missing Items</option>
+                  <option value="Under Investigation">Under Investigation</option>
                 </select>
               </div>
             </div>
@@ -69,12 +76,21 @@
               <textarea class="form-control" name="notes" rows="3" placeholder="Any delivery notes, issues, or remarks..."></textarea>
             </div>
 
-            <div style="background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:14px 16px;margin:20px 0;font-size:13px;color:var(--medium-blue);">
-              📧 <strong>An email will be sent automatically</strong> to <strong><%= dispatch.email || 'the customer' %></strong> with tracking and delivery details once you save.
+            <!-- Receipt + Goods Photo Upload -->
+            <div style="margin:20px 0;background:var(--soft-grey);border-radius:10px;padding:20px;">
+              <div style="font-weight:700;color:var(--deep-blue);margin-bottom:8px;font-size:14px;">📸 Upload Receipt Photo / Proof of Delivery / Damage Photos</div>
+              <p style="font-size:12px;color:var(--dark-grey);margin:0 0 12px;">Upload signed receipt, proof of delivery, or damage photos. These are sent to the customer and visible to admin for damage tracing.</p>
+              <input type="file" name="receipt_media" multiple accept="image/*,video/*,.pdf" class="form-control" id="receiptFileInput" style="background:white;" onchange="previewFiles(this, 'receiptPreview')">
+              <div id="receiptPreview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;"></div>
+              <p style="font-size:11px;color:var(--dark-grey);margin:6px 0 0;">📧 Photos will be attached to the email sent to the customer and admin. Max 20MB each.</p>
+            </div>
+
+            <div style="background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:14px 16px;margin:0 0 20px;font-size:13px;color:var(--medium-blue);">
+              📧 <strong>An email will be sent automatically</strong> to <strong><%= dispatch.email || 'the customer' %></strong> with tracking, delivery details, and any uploaded photos.
             </div>
 
             <div style="display:flex;gap:12px;">
-              <button type="submit" class="btn btn-blue">🧾 Save Receipt & Notify Customer</button>
+              <button type="submit" class="btn btn-blue">🧾 Save Receipt &amp; Notify Customer</button>
               <a href="/dispatch" class="btn btn-outline">Cancel</a>
             </div>
           </form>

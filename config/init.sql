@@ -75,3 +75,25 @@ CREATE TABLE IF NOT EXISTS audit_log (
   detail TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Media attachments for dispatch records (goods photos/videos)
+CREATE TABLE IF NOT EXISTS dispatch_media (
+  id SERIAL PRIMARY KEY,
+  inv_number BIGINT REFERENCES dispatch_records(inv_number) ON DELETE CASCADE,
+  media_type VARCHAR(20) DEFAULT 'goods', -- 'goods' | 'receipt'
+  file_name VARCHAR(255),
+  original_name VARCHAR(255),
+  mime_type VARCHAR(100),
+  uploaded_by VARCHAR(100),
+  uploaded_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Invoice edit log (tracks every employee alteration)
+CREATE TABLE IF NOT EXISTS invoice_edit_log (
+  id SERIAL PRIMARY KEY,
+  inv_number BIGINT,
+  edited_by VARCHAR(100) NOT NULL,
+  edit_type VARCHAR(50) DEFAULT 'EMPLOYEE_EDIT',
+  changes_detail TEXT,
+  edited_at TIMESTAMP DEFAULT NOW()
+);

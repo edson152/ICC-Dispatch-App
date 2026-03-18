@@ -1,0 +1,72 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;"><a href="/admin/receipts" class="btn btn-outline btn-sm">← Back to Receipts</a></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🧾 Admin: Edit Receipt #<%= receipt.id %> — Invoice #<%= receipt.inv_number %></span>
+          <span style="font-size:12px;color:var(--dark-grey);">Editing as: <strong style="color:var(--medium-blue);"><%= user.name %></strong></span>
+        </div>
+        <div class="card-body">
+          <div style="background:#EBF8FF;border:1px solid #90CDF4;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#2b6cb0;">
+            Customer: <strong><%= receipt.acc_name %></strong> &nbsp;|&nbsp; Email: <strong><%= receipt.customer_email || '—' %></strong>
+          </div>
+
+          <form method="POST" action="/admin/receipts/edit/<%= receipt.id %>" enctype="multipart/form-data">
+            <div class="form-grid">
+              <div class="form-row"><label>Receipt Date</label><input class="form-control" type="date" name="receipt_date" value="<%= receipt.receipt_date ? new Date(receipt.receipt_date).toISOString().slice(0,10) : '' %>"></div>
+              <div class="form-row"><label>Received By</label><input class="form-control" name="received_by" value="<%= receipt.received_by || '' %>"></div>
+              <div class="form-row"><label>Recipient Name</label><input class="form-control" name="recipient_name" value="<%= receipt.recipient_name || '' %>"></div>
+              <div class="form-row">
+                <label>Condition of Goods</label>
+                <select class="form-control" name="condition">
+                  <% ['Good','Damaged','Partial Damage','Missing Items','Under Investigation'].forEach(c => { %><option value="<%= c %>" <%= receipt.condition===c?'selected':'' %>><%= c %></option><% }) %>
+                </select>
+              </div>
+              <div class="form-row" style="grid-column:span 2;"><label>Notes</label><textarea class="form-control" name="notes" rows="3"><%= receipt.notes || '' %></textarea></div>
+            </div>
+
+            <!-- Receipt Media Upload -->
+            <div style="margin:20px 0;background:var(--soft-grey);border-radius:10px;padding:20px;">
+              <div style="font-weight:700;color:var(--deep-blue);margin-bottom:8px;font-size:14px;">📸 Upload Receipt Photo / Proof of Delivery</div>
+              <input type="file" name="receipt_media" multiple accept="image/*,.pdf" class="form-control" style="background:white;">
+              <p style="font-size:11px;color:var(--dark-grey);margin:6px 0 0;">Upload signed receipt or POD photos. These are visible to admin and can be sent to the customer.</p>
+            </div>
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <button type="submit" class="btn btn-blue">💾 Save Receipt Changes</button>
+              <a href="/admin/receipts" class="btn btn-outline">Cancel</a>
+              <form method="POST" action="/admin/receipts/<%= receipt.id %>?_method=DELETE" onsubmit="return confirm('Delete this receipt? This cannot be undone.');" style="margin-left:auto;">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="btn" style="background:#e53e3e;color:white;">🗑 Delete Receipt</button>
+              </form>
+            </div>
+          </form>
+
+          <% if (receiptMedia && receiptMedia.length > 0) { %>
+            <hr class="section-divider">
+            <div class="section-title">📸 Receipt Photos</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+              <% receiptMedia.forEach(m => { %>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;width:160px;">
+                  <% if (m.mime_type && m.mime_type.startsWith('image/')) { %>
+                    <a href="/uploads/receipts/<%= m.file_name %>" target="_blank"><img src="/uploads/receipts/<%= m.file_name %>" style="width:100%;height:120px;object-fit:cover;"></a>
+                  <% } else { %>
+                    <a href="/uploads/receipts/<%= m.file_name %>" target="_blank" style="display:block;padding:30px;text-align:center;font-size:32px;">📄</a>
+                  <% } %>
+                  <div style="padding:8px;font-size:11px;color:var(--dark-grey);text-align:center;"><%= m.original_name.length>20?m.original_name.substring(0,18)+'...':m.original_name %></div>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body>
+</html>

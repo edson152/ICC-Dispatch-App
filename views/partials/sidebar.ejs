@@ -28,11 +28,17 @@
       <a href="/admin/reports" class="nav-item <%= title.includes('Reports') ? 'active' : '' %>">
         <span class="nav-icon">📈</span> Reports
       </a>
+      <a href="/admin/audit-log" class="nav-item <%= title.includes('Audit Log') ? 'active' : '' %>">
+        <span class="nav-icon">🔍</span> Audit Log
+      </a>
       <a href="/admin/export" class="nav-item">
         <span class="nav-icon">⬇</span> Export CSV
       </a>
     <% } else { %>
       <div class="nav-section-label">Dispatch</div>
+      <a href="/dispatch/new" class="nav-item <%= title.includes('Add New Invoice') ? 'active' : '' %>" style="background:linear-gradient(135deg,#1A4A9C,#0D2B5E);color:white;border-radius:8px;margin-bottom:4px;">
+        <span class="nav-icon">➕</span> New Invoice
+      </a>
       <a href="/dispatch" class="nav-item <%= title.includes('Dispatch Orders') ? 'active' : '' %>">
         <span class="nav-icon">📋</span> Dispatch Orders
       </a>

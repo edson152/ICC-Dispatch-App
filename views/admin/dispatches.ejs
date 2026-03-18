@@ -28,35 +28,19 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">📦 All Dispatch Records (<%= dispatches.length %>)</span>
+          <span style="font-size:12px;color:var(--dark-grey);">Admin can <strong>Edit</strong> or <strong>Delete</strong> any invoice</span>
         </div>
         <div class="table-wrapper" style="overflow-x:auto;">
-          <table style="min-width:1400px;">
+          <table style="min-width:1500px;">
             <thead>
               <tr>
-                <th>Invoice #</th>
-                <th>Date</th>
-                <th>Order #</th>
-                <th>Acc No</th>
-                <th>Customer</th>
-                <th>Email</th>
-                <th>Invoiced By</th>
-                <th>Int Rep</th>
-                <th>Ext Rep</th>
-                <th>Picker</th>
-                <th>Packer</th>
-                <th>Checker</th>
-                <th>Weight</th>
-                <th>Boxes</th>
-                <th>Bales</th>
-                <th>Packages</th>
-                <th>Delivery</th>
-                <th>Transport Co.</th>
-                <th>Driver</th>
-                <th>Plate</th>
-                <th>Tracking</th>
-                <th>Total (Excl)</th>
-                <th>Captured By</th>
-                <th>Status</th>
+                <th>Invoice #</th><th>Date</th><th>Order #</th><th>Acc No</th>
+                <th>Customer</th><th>Email</th><th>Invoiced By</th>
+                <th>Picker</th><th>Packer</th><th>Checker</th>
+                <th>Weight</th><th>Boxes</th><th>Bales</th><th>Packages</th>
+                <th>Delivery</th><th>Transport Co.</th><th>Driver</th>
+                <th>Plate</th><th>Tracking</th><th>Total (Excl)</th>
+                <th>Captured By</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -67,11 +51,9 @@
                   <td class="nowrap"><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
                   <td><%= d.order_num || '—' %></td>
                   <td><%= d.acc_no || '—' %></td>
-                  <td class="truncate" style="max-width:160px;" title="<%= d.acc_name %>"><%= d.acc_name %></td>
+                  <td class="truncate" style="max-width:140px;" title="<%= d.acc_name %>"><%= d.acc_name %></td>
                   <td class="small text-muted"><%= d.email || '—' %></td>
                   <td><%= d.invoiced_by || '—' %></td>
-                  <td><%= d.internal_rep || '—' %></td>
-                  <td><%= d.ext_rep || '—' %></td>
                   <td><%= d.picker || '—' %></td>
                   <td><%= d.packer || '—' %></td>
                   <td><%= d.checker || '—' %></td>
@@ -80,17 +62,24 @@
                   <td><%= d.bales || 0 %></td>
                   <td class="small"><%= d.total_packages || '—' %></td>
                   <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
-                  <td><strong><%= d.transport_company || '<span class="text-muted">—</span>' %></strong></td>
-                  <td class="nowrap"><%= d.driver_first_name ? d.driver_first_name + ' ' + d.driver_surname : '<span class="text-muted">—</span>' %></td>
-                  <td><%= d.license_plate || '<span class="text-muted">—</span>' %></td>
-                  <td class="small"><%= d.tracking_number || '<span class="text-muted">—</span>' %></td>
+                  <td><strong><%= d.transport_company || '—' %></strong></td>
+                  <td class="nowrap"><%= d.driver_first_name ? d.driver_first_name + ' ' + d.driver_surname : '—' %></td>
+                  <td><%= d.license_plate || '—' %></td>
+                  <td class="small"><%= d.tracking_number || '—' %></td>
                   <td class="nowrap"><strong style="color:var(--medium-blue)">R <%= d.inv_tot_excl ? parseFloat(d.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></strong></td>
-                  <td><%= d.captured_by || '<span class="text-muted">—</span>' %></td>
+                  <td><%= d.captured_by || '—' %></td>
                   <td><span class="badge <%= done ? 'badge-success' : 'badge-warning' %>"><%= done ? '✔' : '⏳' %></span></td>
+                  <td style="white-space:nowrap;">
+                    <a href="/admin/invoices/edit/<%= d.inv_number %>" class="btn btn-blue btn-sm">✏ Edit</a>
+                    <form method="POST" action="/admin/invoices/<%= d.inv_number %>?_method=DELETE" onsubmit="return confirm('⚠️ PERMANENTLY DELETE Invoice #<%= d.inv_number %> for <%= d.acc_name %>? This cannot be undone.');" style="display:inline-block;margin-left:4px;">
+                      <input type="hidden" name="_method" value="DELETE">
+                      <button type="submit" class="btn btn-sm" style="background:#e53e3e;color:white;">🗑</button>
+                    </form>
+                  </td>
                 </tr>
               <% }) %>
               <% if (dispatches.length === 0) { %>
-                <tr><td colspan="24" style="text-align:center;padding:40px;color:var(--dark-grey);">No records found.</td></tr>
+                <tr><td colspan="23" style="text-align:center;padding:40px;color:var(--dark-grey);">No records found.</td></tr>
               <% } %>
             </tbody>
           </table>

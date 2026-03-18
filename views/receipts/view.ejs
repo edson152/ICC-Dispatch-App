@@ -11,7 +11,7 @@
 
       <div class="card">
         <div class="card-header">
-          <span class="card-title">🧾 Delivery Receipt #<%= receipt.id %></span>
+          <span class="card-title">🧾 Delivery Receipt #<%= receipt.id %> — Invoice #<%= receipt.inv_number %></span>
           <span class="badge <%= receipt.condition === 'Good' ? 'badge-success' : receipt.condition === 'Damaged' ? 'badge-danger' : 'badge-warning' %>"><%= receipt.condition %></span>
         </div>
         <div class="card-body">
@@ -19,7 +19,7 @@
           <div class="detail-grid">
             <div class="detail-field highlight"><label>Invoice #</label><span>#<%= receipt.inv_number %></span></div>
             <div class="detail-field highlight"><label>Receipt Date</label><span><%= receipt.receipt_date ? new Date(receipt.receipt_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></span></div>
-            <div class="detail-field highlight"><label>Captured By</label><span><%= receipt.captured_by %></span></div>
+            <div class="detail-field highlight"><label>Captured By</label><span style="color:var(--medium-blue);font-weight:700;"><%= receipt.captured_by %></span></div>
             <div class="detail-field" style="grid-column:span 2;"><label>Customer</label><span><%= receipt.acc_name %></span></div>
             <div class="detail-field"><label>Customer Email</label><span><%= receipt.customer_email || '—' %></span></div>
             <div class="detail-field"><label>Received By</label><span><%= receipt.received_by || '—' %></span></div>
@@ -32,12 +32,66 @@
             <div class="detail-field"><label>Packages</label><span><%= receipt.total_packages || '—' %></span></div>
             <div class="detail-field"><label>Invoice Value</label><span style="color:var(--medium-blue);font-weight:700;">R <%= receipt.inv_tot_excl ? parseFloat(receipt.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></span></div>
           </div>
+
           <% if (receipt.notes) { %>
             <div style="margin-top:20px;padding:14px 16px;background:rgba(74,144,217,0.07);border-left:4px solid var(--light-blue);border-radius:4px;">
               <div style="font-size:11px;font-weight:700;color:var(--dark-grey);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>
               <p style="margin:0;font-size:14px;"><%= receipt.notes %></p>
             </div>
           <% } %>
+
+          <!-- Receipt / POD Photos -->
+          <% if (receiptMedia && receiptMedia.length > 0) { %>
+            <hr class="section-divider">
+            <div class="section-title">📸 Receipt / Proof of Delivery Photos (<%= receiptMedia.length %>)</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px;">
+              <% receiptMedia.forEach(m => { %>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;">
+                  <% if (m.mime_type && m.mime_type.startsWith('image/')) { %>
+                    <a href="/uploads/receipts/<%= m.file_name %>" target="_blank">
+                      <img src="/uploads/receipts/<%= m.file_name %>" style="width:100%;height:140px;object-fit:cover;" alt="Receipt photo">
+                    </a>
+                  <% } else { %>
+                    <a href="/uploads/receipts/<%= m.file_name %>" target="_blank" style="display:block;padding:40px;font-size:40px;">📄</a>
+                  <% } %>
+                  <div style="padding:8px;font-size:11px;color:var(--dark-grey);">
+                    <div style="font-weight:600;" title="<%= m.original_name %>"><%= m.original_name.length>22?m.original_name.substring(0,20)+'...':m.original_name %></div>
+                    <div>By: <%= m.uploaded_by %></div>
+                    <div><%= new Date(m.uploaded_at).toLocaleDateString('en-ZA') %></div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+
+          <!-- Goods Photos -->
+          <% if (goodsMedia && goodsMedia.length > 0) { %>
+            <hr class="section-divider">
+            <div class="section-title">📦 Goods Photos at Dispatch (<%= goodsMedia.length %>)</div>
+            <p style="font-size:12px;color:var(--dark-grey);margin:0 0 12px;">These photos were taken before dispatch — compare with delivery condition to determine if damage is from our side or the courier.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
+              <% goodsMedia.forEach(m => { %>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;">
+                  <% if (m.mime_type && m.mime_type.startsWith('image/')) { %>
+                    <a href="/uploads/goods/<%= m.file_name %>" target="_blank">
+                      <img src="/uploads/goods/<%= m.file_name %>" style="width:100%;height:140px;object-fit:cover;" alt="Goods photo">
+                    </a>
+                  <% } else if (m.mime_type && m.mime_type.startsWith('video/')) { %>
+                    <video style="width:100%;height:140px;object-fit:cover;" controls>
+                      <source src="/uploads/goods/<%= m.file_name %>" type="<%= m.mime_type %>">
+                    </video>
+                  <% } else { %>
+                    <a href="/uploads/goods/<%= m.file_name %>" target="_blank" style="display:block;padding:40px;font-size:40px;">📄</a>
+                  <% } %>
+                  <div style="padding:8px;font-size:11px;color:var(--dark-grey);">
+                    <div style="font-weight:600;" title="<%= m.original_name %>"><%= m.original_name.length>22?m.original_name.substring(0,20)+'...':m.original_name %></div>
+                    <div>By: <%= m.uploaded_by %></div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+
           <div style="margin-top:20px;font-size:12px;color:var(--dark-grey);">
             Captured on <%= receipt.captured_at ? new Date(receipt.captured_at).toLocaleString('en-ZA') : '—' %>
           </div>
