@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">⚠ Returns & Damaged Goods</span>
+          <span style="font-size:12px;color:var(--danger);"><%= returns.filter(r=>!r.resolved).length %> open</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Invoice</th><th>Customer</th><th>Type</th><th>Description</th><th>Photo</th><th>Reported By</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <% returns.forEach(r => { %>
+                <tr style="<%=!r.resolved?'background:rgba(229,62,62,0.03);':''%>">
+                  <td><%= r.id %></td>
+                  <td><strong style="color:var(--deep-blue)">#<%= r.inv_number %></strong></td>
+                  <td class="truncate" style="max-width:120px;"><%= r.acc_name||'—' %></td>
+                  <td><span class="badge badge-danger"><%= r.return_type %></span></td>
+                  <td class="small" style="max-width:180px;"><%= r.description||'—' %></td>
+                  <td>
+                    <% if (r.photo_path) { %>
+                      <a href="/uploads/returns/<%= r.photo_path %>" target="_blank"><img src="/uploads/returns/<%= r.photo_path %>" style="width:40px;height:40px;object-fit:cover;border-radius:4px;"></a>
+                    <% } else { %>—<% } %>
+                  </td>
+                  <td><%= r.reported_by||'—' %></td>
+                  <td class="small nowrap"><%= new Date(r.created_at).toLocaleDateString('en-ZA') %></td>
+                  <td><span class="badge <%=r.resolved?'badge-success':'badge-warning'%>"><%= r.resolved?'✅ Resolved':'⏳ Open' %></span></td>
+                  <td>
+                    <% if (!r.resolved) { %>
+                      <form method="POST" action="/returns/resolve/<%= r.id %>">
+                        <button type="submit" class="btn btn-success btn-sm">✔ Resolve</button>
+                      </form>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+              <% if (!returns.length) { %><tr><td colspan="10" style="text-align:center;padding:30px;color:var(--dark-grey);">No returns reported.</td></tr><% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body></html>

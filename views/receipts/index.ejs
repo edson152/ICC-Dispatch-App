@@ -4,7 +4,10 @@
   <div class="main-content">
     <%- include('../partials/topbar') %>
     <div class="page-body">
-      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+      <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center;">
+        <a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a>
+        <a href="/receipts/manual" class="btn btn-blue btn-sm">➕ New Receipt</a>
+      </div>
 
       <div class="card">
         <div class="card-header">

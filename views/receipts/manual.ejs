@@ -1,0 +1,147 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">🧾 New Delivery Receipt</span>
+          <span style="font-size:12px;color:var(--dark-grey);">Captured by: <strong><%= user.name %></strong></span>
+        </div>
+        <div class="card-body">
+
+          <!-- Step 1: Invoice Lookup -->
+          <div class="section-title">Step 1 — Enter Invoice Number</div>
+          <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:24px;flex-wrap:wrap;">
+            <div>
+              <label style="font-size:11px;font-weight:700;color:var(--deep-blue);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Invoice Number</label>
+              <input type="text" id="invLookupInput" class="form-control" placeholder="e.g. 776691"
+                value="<%= invNum %>" style="width:220px;" oninput="clearAutoFill()">
+            </div>
+            <button type="button" class="btn btn-blue" onclick="lookupInvoice()">🔍 Load Details</button>
+          </div>
+
+          <!-- Auto-filled customer details (read-only from DB) -->
+          <div id="invoiceDetails" style="<%= dispatch?'':'display:none;' %>">
+            <div class="section-title">📄 Invoice Details <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--dark-grey);">(auto-filled from database — read-only)</span></div>
+            <div class="detail-grid" style="margin-bottom:24px;" id="detailGrid">
+              <div class="detail-field highlight"><label>Invoice #</label><span id="d_inv"><%= dispatch?'#'+dispatch.inv_number:'' %></span></div>
+              <div class="detail-field highlight" style="grid-column:span 2;"><label>Customer</label><span id="d_customer"><%= dispatch?dispatch.acc_name:'' %></span></div>
+              <div class="detail-field" style="grid-column:span 3;"><label>Address</label><span id="d_address"><%= dispatch?(dispatch.address||'')+(dispatch.city?', '+dispatch.city:''):'' %></span></div>
+              <div class="detail-field"><label>Email</label><span id="d_email"><%= dispatch?dispatch.email||'—':'' %></span></div>
+              <div class="detail-field"><label>Phone</label><span id="d_phone"><%= dispatch?dispatch.phone||'—':'' %></span></div>
+              <div class="detail-field"><label>Delivery Method</label><span id="d_delivery"><%= dispatch?dispatch.delivery_method:'' %></span></div>
+              <div class="detail-field"><label>Transport Co.</label><span id="d_transport"><%= dispatch?dispatch.transport_company||'—':'' %></span></div>
+              <div class="detail-field"><label>Tracking #</label><span id="d_tracking"><%= dispatch?dispatch.tracking_number||'—':'' %></span></div>
+              <div class="detail-field"><label>Bales</label><span id="d_bales" style="font-weight:700;color:var(--medium-blue);"><%= dispatch?dispatch.bales||0:'' %></span></div>
+              <div class="detail-field"><label>Boxes</label><span id="d_boxes" style="font-weight:700;color:var(--medium-blue);"><%= dispatch?dispatch.boxes||0:'' %></span></div>
+              <div class="detail-field"><label>Total Packages</label><span id="d_packages"><%= dispatch?dispatch.total_packages||'—':'' %></span></div>
+              <div class="detail-field"><label>Picker</label><span id="d_picker"><%= dispatch?dispatch.picker||'—':'' %></span></div>
+              <div class="detail-field"><label>Packer</label><span id="d_packer"><%= dispatch?dispatch.packer||'—':'' %></span></div>
+              <div class="detail-field"><label>Checker</label><span id="d_checker"><%= dispatch?dispatch.checker||'—':'' %></span></div>
+            </div>
+
+            <div style="background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--medium-blue);">
+              📧 An email will be sent to the customer with delivery confirmation once you save.
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- Step 2: Receipt details (employee fills this part) -->
+            <div class="section-title">Step 2 — Capture Receipt Details</div>
+            <form method="POST" action="/receipts/new/<%= dispatch?dispatch.inv_number:'' %>" id="receiptForm">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label class="required">Receipt Date</label>
+                  <input class="form-control" type="date" name="receipt_date" value="<%= new Date().toISOString().slice(0,10) %>" required>
+                </div>
+                <div class="form-row">
+                  <label class="required">Received By (name of person at customer)</label>
+                  <input class="form-control" name="received_by" placeholder="Person who accepted the goods" required>
+                </div>
+                <div class="form-row">
+                  <label>Recipient Full Name</label>
+                  <input class="form-control" name="recipient_name" placeholder="Full name for record">
+                </div>
+                <div class="form-row">
+                  <label>Condition of Goods</label>
+                  <select class="form-control" name="condition">
+                    <option value="Good">✅ Good — No damage</option>
+                    <option value="Minor Damage">⚠ Minor Damage</option>
+                    <option value="Damaged">❌ Damaged</option>
+                    <option value="Partial Delivery">📦 Partial Delivery</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <label>Notes / Remarks</label>
+                <textarea class="form-control" name="notes" rows="2" placeholder="Any notes, issues, or remarks..."></textarea>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:8px;">
+                <button type="submit" class="btn btn-blue">🧾 Save Receipt & Notify Customer</button>
+                <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+              </div>
+            </form>
+          </div>
+
+          <!-- Placeholder when no invoice loaded yet -->
+          <div id="noInvoice" style="<%= dispatch?'display:none;':'' %>text-align:center;padding:40px;color:var(--dark-grey);">
+            <div style="font-size:48px;margin-bottom:12px;">🔍</div>
+            <p>Enter an invoice number above and click <strong>Load Details</strong><br>to auto-fill the customer and shipment information.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function lookupInvoice() {
+  const num = document.getElementById('invLookupInput').value.trim();
+  if (!num) return;
+  try {
+    const r = await fetch('/receipts/lookup/' + num);
+    const d = await r.json();
+    if (d.error) {
+      alert('Invoice #' + num + ' not found. Please check the number.');
+      return;
+    }
+    // Fill display fields
+    document.getElementById('d_inv').textContent = '#' + d.inv_number;
+    document.getElementById('d_customer').textContent = d.acc_name || '—';
+    document.getElementById('d_address').textContent = (d.address||'') + (d.city?', '+d.city:'') || '—';
+    document.getElementById('d_email').textContent = d.email || '—';
+    document.getElementById('d_phone').textContent = d.phone || '—';
+    document.getElementById('d_delivery').textContent = d.delivery_method || '—';
+    document.getElementById('d_transport').textContent = d.transport_company || '—';
+    document.getElementById('d_tracking').textContent = d.tracking_number || '—';
+    document.getElementById('d_bales').textContent = d.bales || 0;
+    document.getElementById('d_boxes').textContent = d.boxes || 0;
+    document.getElementById('d_packages').textContent = d.total_packages || '—';
+    document.getElementById('d_picker').textContent = d.picker || '—';
+    document.getElementById('d_packer').textContent = d.packer || '—';
+    document.getElementById('d_checker').textContent = d.checker || '—';
+    // Update form action
+    document.getElementById('receiptForm').action = '/receipts/new/' + d.inv_number;
+    // Show details
+    document.getElementById('invoiceDetails').style.display = 'block';
+    document.getElementById('noInvoice').style.display = 'none';
+  } catch(e) {
+    alert('Error looking up invoice. Please try again.');
+  }
+}
+function clearAutoFill() {
+  // Hide details when user changes the input
+  document.getElementById('invoiceDetails').style.display = 'none';
+  document.getElementById('noInvoice').style.display = 'block';
+}
+document.getElementById('invLookupInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); lookupInvoice(); }
+});
+</script>
+<script src="/js/app.js"></script>
+</body></html>

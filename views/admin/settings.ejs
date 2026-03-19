@@ -5,38 +5,124 @@
     <%- include('../partials/topbar') %>
     <div class="page-body">
       <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
-      <div class="card" style="max-width:700px;">
-        <div class="card-header"><span class="card-title">⚙ System Settings</span></div>
-        <div class="card-body">
-          <form method="POST" action="/admin/settings">
-            <div class="section-title">📷 Photo Requirements</div>
-            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px;">
+      <form method="POST" action="/admin/settings">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+          <!-- Notifications -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">📱 Notifications</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
               <label class="toggle-row">
-                <input type="checkbox" name="require_goods_photo" <%= settings.require_goods_photo==='true'?'checked':'' %>>
-                <span class="toggle-label">Require goods/parcel photos before dispatch can be saved</span>
+                <input type="checkbox" name="sms_enabled" <%=settings.sms_enabled==='true'?'checked':''%>>
+                <span class="toggle-label">Enable SMS (BulkSMS SA)</span>
               </label>
               <label class="toggle-row">
-                <input type="checkbox" name="require_driver_photo" <%= settings.require_driver_photo==='true'?'checked':'' %>>
-                <span class="toggle-label">Require driver photo upload</span>
+                <input type="checkbox" name="whatsapp_enabled" <%=settings.whatsapp_enabled==='true'?'checked':''%>>
+                <span class="toggle-label">Enable WhatsApp (Twilio)</span>
+              </label>
+              <div class="form-row" style="margin:0;">
+                <label>Default Notification Channel</label>
+                <select class="form-control" name="notification_channel">
+                  <option value="sms" <%=settings.notification_channel==='sms'?'selected':''%>>SMS Only</option>
+                  <option value="whatsapp" <%=settings.notification_channel==='whatsapp'?'selected':''%>>WhatsApp Only</option>
+                  <option value="both" <%=settings.notification_channel==='both'?'selected':''%>>Both SMS + WhatsApp</option>
+                  <option value="none" <%=settings.notification_channel==='none'?'selected':''%>>None</option>
+                </select>
+              </div>
+              <div style="background:var(--soft-grey);border-radius:8px;padding:12px;font-size:12px;color:var(--dark-grey);">
+                <strong>SMS:</strong> Set BULKSMS_USERNAME + BULKSMS_PASSWORD in .env<br>
+                <strong>WhatsApp:</strong> Set TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_WHATSAPP_FROM in .env
+              </div>
+            </div>
+          </div>
+
+          <!-- Photo Requirements -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">📷 Photo Requirements</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <label class="toggle-row">
+                <input type="checkbox" name="require_goods_photo" <%=settings.require_goods_photo==='true'?'checked':''%>>
+                <span class="toggle-label">Require goods/parcel photos</span>
               </label>
               <label class="toggle-row">
-                <input type="checkbox" name="require_license_photo" <%= settings.require_license_photo==='true'?'checked':'' %>>
+                <input type="checkbox" name="require_driver_photo" <%=settings.require_driver_photo==='true'?'checked':''%>>
+                <span class="toggle-label">Require driver photo</span>
+              </label>
+              <label class="toggle-row">
+                <input type="checkbox" name="require_license_photo" <%=settings.require_license_photo==='true'?'checked':''%>>
                 <span class="toggle-label">Require driver license photo</span>
               </label>
             </div>
-            <div class="section-title">📱 SMS Notifications</div>
-            <div style="background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:16px;margin-bottom:20px;">
-              <p style="font-size:13px;color:var(--text-dark);margin:0 0 12px;">SMS uses <strong>BulkSMS.com</strong> — South Africa's leading bulk SMS provider. Set your API credentials in the <code>.env</code> file:</p>
-              <code style="font-size:12px;background:var(--soft-grey);padding:8px 12px;border-radius:6px;display:block;">BULKSMS_USERNAME=your_username<br>BULKSMS_PASSWORD=your_password<br>BULKSMS_SENDER=ICCDispatch</code>
+          </div>
+
+          <!-- Daily Report -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">📊 Daily Report Email</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <label class="toggle-row">
+                <input type="checkbox" name="daily_report_email" <%=settings.daily_report_email==='true'?'checked':''%>>
+                <span class="toggle-label">Send daily report email at 8am</span>
+              </label>
+              <div class="form-row" style="margin:0;">
+                <label>Send Report To</label>
+                <input class="form-control" name="daily_report_to" value="<%= settings.daily_report_to||'' %>" placeholder="manager@icc.co.za">
+              </div>
             </div>
-            <label class="toggle-row" style="margin-bottom:20px;">
-              <input type="checkbox" name="sms_enabled" <%= settings.sms_enabled==='true'?'checked':'' %>>
-              <span class="toggle-label">Enable SMS notifications to customers on dispatch</span>
-            </label>
-            <button type="submit" class="btn btn-blue">💾 Save Settings</button>
-          </form>
+          </div>
+
+          <!-- Customer Tracking -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">🔗 Customer Tracking</span></div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+              <label class="toggle-row">
+                <input type="checkbox" name="tracking_enabled" <%=settings.tracking_enabled==='true'?'checked':''%>>
+                <span class="toggle-label">Enable customer self-tracking page</span>
+              </label>
+              <div style="background:var(--soft-grey);border-radius:8px;padding:12px;font-size:12px;color:var(--dark-grey);">
+                When enabled, customers receive a link like:<br>
+                <code style="font-size:11px;">https://your-site.com/track/[token]</code><br>
+                No login required — token expires after 30 days.
+              </div>
+            </div>
+          </div>
+
+          <!-- Sage Evolution -->
+          <div class="card" style="grid-column:span 2;">
+            <div class="card-header"><span class="card-title">🔗 Sage Evolution Integration</span></div>
+            <div class="card-body">
+              <div style="background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--medium-blue);">
+                ℹ Connect directly to your Sage Evolution SQL Server database to auto-import customer details, addresses, and order information. Requires network access to the Sage server and the <code>mssql</code> npm package.
+              </div>
+              <label class="toggle-row" style="margin-bottom:14px;">
+                <input type="checkbox" name="sage_enabled" <%=settings.sage_enabled==='true'?'checked':''%>>
+                <span class="toggle-label">Enable Sage Evolution sync</span>
+              </label>
+              <div class="form-grid">
+                <div class="form-row"><label>Sage Server Host</label><input class="form-control" name="sage_host" value="<%= settings.sage_host||'' %>" placeholder="192.168.1.100 or SERVERNAME"></div>
+                <div class="form-row"><label>Sage Database Name</label><input class="form-control" name="sage_db" value="<%= settings.sage_db||'' %>" placeholder="SageEvolution"></div>
+                <div class="form-row"><label>Sage SQL Username</label><input class="form-control" name="sage_user" value="<%= settings.sage_user||'' %>" placeholder="sa"></div>
+              </div>
+              <div style="font-size:12px;color:var(--dark-grey);">Set SAGE_PASSWORD in your .env file (never enter passwords here).</div>
+
+              <!-- Driver Mobile Links -->
+              <div class="card-header" style="margin-top:20px;padding:0 0 12px;"><span class="card-title">🚛 Driver Mobile Page Links</span></div>
+              <div style="font-size:13px;color:var(--dark-grey);margin-bottom:10px;">Share these links with your drivers — they open on any phone browser, no app needed:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <% trucks.forEach(t => { %>
+                  <a href="/driver/<%= t.id %>" target="_blank" style="background:var(--soft-grey);border:1px solid var(--mid-grey);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--deep-blue);text-decoration:none;">
+                    🚛 <%= t.truck_name %> — /driver/<%= t.id %>
+                  </a>
+                <% }) %>
+                <% if (!trucks.length) { %><span style="font-size:12px;color:var(--dark-grey);">Add trucks in Fleet Management first.</span><% } %>
+              </div>
+            </div>
+          </div>
+
         </div>
-      </div>
+        <div style="margin-top:20px;">
+          <button type="submit" class="btn btn-blue">💾 Save All Settings</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

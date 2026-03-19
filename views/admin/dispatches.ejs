@@ -70,12 +70,8 @@
                   <td class="nowrap"><strong style="color:var(--medium-blue)">R <%= d.inv_tot_excl ? parseFloat(d.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></strong></td>
                   <td><%= d.captured_by || '—' %></td>
                   <td><span class="badge <%= done ? 'badge-success' : 'badge-warning' %>"><%= done ? '✔' : '⏳' %></span></td>
-                  <td style="white-space:nowrap;">
-                    <a href="/admin/invoices/edit/<%= d.inv_number %>" class="btn btn-blue btn-sm">✏ Edit</a>
-                    <form method="POST" action="/admin/invoices/<%= d.inv_number %>?_method=DELETE" onsubmit="return confirm('⚠️ PERMANENTLY DELETE Invoice #<%= d.inv_number %> for <%= d.acc_name %>? This cannot be undone.');" style="display:inline-block;margin-left:4px;">
-                      <input type="hidden" name="_method" value="DELETE">
-                      <button type="submit" class="btn btn-sm" style="background:#e53e3e;color:white;">🗑</button>
-                    </form>
+                  <td>
+                    <a href="/dispatch/capture/<%= d.inv_number %>" class="btn btn-outline btn-sm">👁 View</a>
                   </td>
                 </tr>
               <% }) %>

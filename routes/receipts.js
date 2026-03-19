@@ -177,4 +177,27 @@ async function sendTrackingEmail(dispatch, receipt, files) {
   } catch (err) { console.error('Email error:', err.message); }
 }
 
+
+// GET - manual receipt entry (employee types invoice number, details auto-fill)
+router.get('/manual', requireAuth, async (req, res) => {
+  const invNum = req.query.inv;
+  let dispatch = null;
+  if (invNum) {
+    try {
+      const r = await db.query('SELECT * FROM dispatch_records WHERE inv_number=$1', [invNum]);
+      if (r.rows.length) dispatch = r.rows[0];
+    } catch(e) {}
+  }
+  res.render('receipts/manual', { title: 'New Delivery Receipt', dispatch, invNum: invNum||'' });
+});
+
+// API: lookup invoice for receipt auto-fill
+router.get('/lookup/:invNumber', requireAuth, async (req, res) => {
+  try {
+    const r = await db.query('SELECT * FROM dispatch_records WHERE inv_number=$1', [req.params.invNumber]);
+    if (!r.rows.length) return res.json({ error: 'Invoice not found' });
+    res.json(r.rows[0]);
+  } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

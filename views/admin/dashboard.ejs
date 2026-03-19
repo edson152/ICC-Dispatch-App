@@ -5,106 +5,142 @@
     <%- include('../partials/topbar') %>
     <div class="page-body">
 
+      <!-- Stats -->
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-icon blue">📦</div><div><div class="stat-label">Total Dispatches</div><div class="stat-value"><%= stats.total %></div></div></div>
         <div class="stat-card"><div class="stat-icon orange">⏳</div><div><div class="stat-label">Pending Capture</div><div class="stat-value"><%= stats.pending %></div></div></div>
         <div class="stat-card"><div class="stat-icon blue">🚚</div><div><div class="stat-label">Out for Delivery</div><div class="stat-value"><%= stats.dispatched %></div></div></div>
         <div class="stat-card"><div class="stat-icon green">✅</div><div><div class="stat-label">Delivered</div><div class="stat-value"><%= stats.delivered %></div></div></div>
-        <div class="stat-card"><div class="stat-icon purple">🧾</div><div><div class="stat-label">Receipts Captured</div><div class="stat-value"><%= receiptCount %></div></div></div>
-        <div class="stat-card"><div class="stat-icon light">💰</div><div><div class="stat-label">Total Value (Excl)</div><div class="stat-value" style="font-size:15px;">R <%= parseFloat(stats.total_value||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}) %></div></div></div>
+        <div class="stat-card"><div class="stat-icon purple">🧾</div><div><div class="stat-label">Receipts</div><div class="stat-value"><%= receiptCount %></div></div></div>
+        <div class="stat-card"><div class="stat-icon light">💰</div><div><div class="stat-label">Total Value</div><div class="stat-value" style="font-size:14px;">R <%= parseFloat(stats.total_value||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}) %></div></div></div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
-        <!-- Delivery Method Chart -->
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">🚚 By Delivery Method</span>
-            <div style="display:flex;gap:6px;">
-              <% byDelivery.forEach(r => { %>
-                <a href="/admin/delivery-detail/<%= encodeURIComponent(r.delivery_method) %>" class="btn btn-outline btn-sm" style="font-size:10px;padding:3px 8px;"><%= r.delivery_method %></a>
-              <% }) %>
+      <!-- Live Truck Progress -->
+      <% if (truckProgress && truckProgress.length) { %>
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header">
+          <span class="card-title">🚛 Live Fleet Progress Today</span>
+          <span style="font-size:12px;color:var(--dark-grey);">Updates when driver marks deliveries complete</span>
+        </div>
+        <div class="card-body">
+          <% truckProgress.forEach(t => { %>
+            <% const out = parseInt(t.out_count)||0; const done = parseInt(t.done_today)||0; const total = out+done; const pct = total>0?Math.round(done/total*100):0; %>
+            <div style="margin-bottom:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <div>
+                  <a href="/trucks/<%= t.id %>" style="font-size:13px;font-weight:700;color:var(--deep-blue);text-decoration:none;">🚛 <%= t.truck_name %></a>
+                  <span style="font-size:11px;color:var(--dark-grey);margin-left:8px;"><%= t.license_plate %> · <%= t.driver_name||'' %> <%= t.driver_surname||'' %></span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <span class="badge badge-info"><%= out %> out</span>
+                  <span class="badge badge-success"><%= done %> done</span>
+                  <a href="/driver/<%= t.id %>" target="_blank" class="btn btn-outline btn-sm" style="font-size:10px;padding:3px 8px;">📱 Driver View</a>
+                </div>
+              </div>
+              <div style="background:var(--mid-grey);border-radius:6px;height:8px;overflow:hidden;">
+                <div style="background:linear-gradient(90deg,var(--medium-blue),var(--success));height:100%;width:<%= pct %>%;border-radius:6px;transition:width 0.5s;"></div>
+              </div>
+              <div style="font-size:11px;color:var(--dark-grey);margin-top:3px;"><%= pct %>% complete today</div>
             </div>
-          </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <!-- Delivery method bars -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">🚚 By Delivery Method</span></div>
           <div class="card-body">
-            <canvas id="deliveryChart" height="180"></canvas>
+            <% const maxCnt=Math.max(...byDelivery.map(r=>parseInt(r.cnt)||0),1); %>
+            <% byDelivery.forEach(r => { %>
+              <% const pct=Math.round((parseInt(r.cnt)||0)/maxCnt*100); %>
+              <div style="margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                  <a href="/admin/delivery-detail/<%= encodeURIComponent(r.delivery_method) %>" style="font-size:13px;font-weight:600;color:var(--deep-blue);text-decoration:none;">
+                    <%= r.delivery_method==='ICC Truck'?'🚛':r.delivery_method==='Courier'?'📦':'🏪' %> <%= r.delivery_method %>
+                  </a>
+                  <span style="font-size:13px;font-weight:700;color:var(--medium-blue);"><%= r.cnt %> orders</span>
+                </div>
+                <div style="background:var(--mid-grey);border-radius:6px;height:10px;overflow:hidden;">
+                  <div style="background:linear-gradient(90deg,var(--medium-blue),var(--light-blue));height:100%;width:<%= pct %>%;border-radius:6px;"></div>
+                </div>
+                <div style="font-size:11px;color:var(--dark-grey);margin-top:3px;">R <%= parseFloat(r.total_value||0).toLocaleString('en-ZA',{minimumFractionDigits:2}) %> · <%= parseFloat(r.total_weight||0).toFixed(1) %> kg</div>
+              </div>
+            <% }) %>
           </div>
         </div>
-        <!-- Top Invoicers -->
+
+        <!-- Top invoicers -->
         <div class="card">
           <div class="card-header"><span class="card-title">👤 Top Invoicers</span></div>
           <div class="card-body" style="padding:0;">
-            <table style="width:100%;">
-              <thead><tr style="background:var(--soft-grey);">
-                <th style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--dark-grey);text-transform:uppercase;">Employee</th>
-                <th style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--dark-grey);text-transform:uppercase;">Invoices</th>
-                <th style="padding:8px 14px;font-size:11px;font-weight:700;color:var(--dark-grey);text-transform:uppercase;">Value</th>
-              </tr></thead>
-              <tbody>
-                <% byEmployee.forEach(r => { %>
-                  <tr style="border-bottom:1px solid var(--mid-grey);">
-                    <td style="padding:9px 14px;font-size:13px;"><strong><%= r.invoiced_by||'Unknown' %></strong></td>
-                    <td style="padding:9px 14px;"><span class="badge badge-info"><%= r.cnt %></span></td>
-                    <td style="padding:9px 14px;font-size:12px;">R <%= parseFloat(r.total).toLocaleString('en-ZA',{minimumFractionDigits:2}) %></td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
+            <% const maxInv=Math.max(...byEmployee.map(r=>parseInt(r.cnt)||0),1); %>
+            <% byEmployee.forEach(r => { %>
+              <% const pct=Math.round((parseInt(r.cnt)||0)/maxInv*100); %>
+              <div style="padding:10px 18px;border-bottom:1px solid var(--mid-grey);">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="font-size:13px;font-weight:600;"><%= r.invoiced_by||'Unknown' %></span>
+                  <span style="font-size:12px;color:var(--dark-grey);"><%= r.cnt %> · R <%= parseFloat(r.total).toLocaleString('en-ZA',{minimumFractionDigits:0}) %></span>
+                </div>
+                <div style="background:var(--mid-grey);border-radius:4px;height:6px;overflow:hidden;">
+                  <div style="background:var(--accent-blue);height:100%;width:<%= pct %>%;border-radius:4px;"></div>
+                </div>
+              </div>
+            <% }) %>
           </div>
         </div>
       </div>
 
-      <!-- Recent PENDING -->
+      <!-- Recent Pending (5) -->
       <div class="card" style="margin-bottom:20px;">
         <div class="card-header">
-          <span class="card-title">⏳ Recent Pending Dispatches</span>
-          <a href="/admin/dispatches" class="btn btn-outline btn-sm">View All</a>
+          <span class="card-title">⏳ Recent Pending</span>
+          <a href="/admin/dispatches?status=pending" class="btn btn-outline btn-sm">View All</a>
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Invoiced By</th><th>Delivery</th><th>Transport</th><th>Captured By</th><th>Status</th></tr></thead>
+            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Delivery</th><th>Packages</th><th>Captured By</th><th>Status</th></tr></thead>
             <tbody>
               <% recentPending.forEach(d => { %>
-                <% const done = d.transport_company && d.transport_company.trim()!==''; %>
                 <tr>
                   <td><strong style="color:var(--deep-blue)">#<%= d.inv_number %></strong></td>
-                  <td><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
+                  <td class="nowrap"><%= d.inv_date?new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}):'—' %></td>
                   <td class="truncate" style="max-width:140px;" title="<%= d.acc_name %>"><%= d.acc_name %></td>
-                  <td><%= d.invoiced_by||'—' %></td>
                   <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
-                  <td class="small"><%= d.transport_company||d.truck_name||'—' %></td>
+                  <td class="small"><%= d.total_packages||'—' %></td>
                   <td><%= d.captured_by||'—' %></td>
-                  <td><span class="badge <%=done?'badge-success':'badge-warning'%>"><%=done?'🚚 Out':'⏳ Pending'%></span></td>
+                  <td><span class="badge <%=d.transport_company?'badge-success':'badge-warning'%>"><%=d.transport_company?'🚚 Out':'⏳ Pending'%></span></td>
                 </tr>
               <% }) %>
+              <% if (!recentPending.length) { %><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--dark-grey);">All caught up! 🎉</td></tr><% } %>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- Recent COMPLETED -->
+      <!-- Recent Completed (5) -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title" style="color:var(--success);">✅ Recent Completed Deliveries</span>
+          <span class="card-title" style="color:var(--success);">✅ Recent Completed</span>
           <a href="/admin/receipts" class="btn btn-outline btn-sm">See More</a>
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Delivery</th><th>Transport</th><th>Captured By</th><th>Dispatched At</th></tr></thead>
+            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Delivery</th><th>Transport</th><th>Captured By</th><th>Delivered</th></tr></thead>
             <tbody>
               <% completed.forEach(d => { %>
-                <tr style="background:rgba(56,161,105,0.04);">
+                <tr style="background:rgba(56,161,105,0.03);">
                   <td><strong style="color:var(--success)">#<%= d.inv_number %></strong></td>
-                  <td><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
+                  <td class="nowrap"><%= d.inv_date?new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}):'—' %></td>
                   <td class="truncate" style="max-width:140px;"><%= d.acc_name %></td>
                   <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
                   <td class="small"><%= d.transport_company||d.truck_name||'—' %></td>
                   <td><strong><%= d.captured_by||'—' %></strong></td>
-                  <td class="small nowrap"><%= d.dispatched_at ? new Date(d.dispatched_at).toLocaleString('en-ZA') : '—' %></td>
+                  <td class="small nowrap"><%= d.delivered_at?new Date(d.delivered_at).toLocaleString('en-ZA'):(d.dispatched_at?new Date(d.dispatched_at).toLocaleString('en-ZA'):'—') %></td>
                 </tr>
               <% }) %>
-              <% if (completed.length===0) { %>
-                <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--dark-grey);">No completed deliveries yet.</td></tr>
-              <% } %>
+              <% if (!completed.length) { %><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--dark-grey);">No completed deliveries yet.</td></tr><% } %>
             </tbody>
           </table>
         </div>
@@ -113,27 +149,5 @@
     </div>
   </div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script>
-const deliveryData = <%- JSON.stringify(byDelivery) %>;
-new Chart(document.getElementById('deliveryChart'), {
-  type: 'doughnut',
-  data: {
-    labels: deliveryData.map(d => d.delivery_method),
-    datasets: [{
-      data: deliveryData.map(d => parseInt(d.cnt)),
-      backgroundColor: ['#1A4A9C','#4A90D9','#63B3ED','#38A169','#D69E2E'],
-      borderWidth: 2, borderColor: '#fff'
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 12 } } }
-    }
-  }
-});
-</script>
 <script src="/js/app.js"></script>
 </body></html>

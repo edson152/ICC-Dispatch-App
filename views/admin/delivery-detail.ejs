@@ -5,17 +5,58 @@
     <%- include('../partials/topbar') %>
     <div class="page-body">
       <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+
+      <!-- ICC Truck summary cards -->
+      <% if (method === 'ICC Truck' && trucks && trucks.length) { %>
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;color:var(--deep-blue);margin-bottom:14px;">🚛 Fleet Overview</h3>
+          <div class="employee-grid">
+            <% trucks.forEach(t => { %>
+              <div class="employee-card">
+                <div style="width:48px;height:48px;border-radius:11px;background:linear-gradient(135deg,var(--deep-blue),var(--light-blue));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🚛</div>
+                <div class="emp-info">
+                  <div class="emp-name"><%= t.truck_name %></div>
+                  <div class="emp-role"><%= t.license_plate %></div>
+                  <div style="font-size:11px;color:var(--dark-grey);margin-top:2px;"><%= t.driver_name||'No driver' %> <%= t.driver_surname||'' %></div>
+                  <div style="margin-top:6px;display:flex;gap:6px;">
+                    <span class="badge badge-info"><%= t.order_count||0 %> orders</span>
+                    <span class="badge badge-success"><%= t.delivered_count||0 %> delivered</span>
+                  </div>
+                </div>
+                <a href="/trucks/<%= t.id %>" class="btn btn-outline btn-sm">Detail</a>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Courier summary cards -->
+      <% if (method === 'Courier' && couriers && couriers.length) { %>
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:15px;font-weight:700;color:var(--deep-blue);margin-bottom:14px;">📦 Courier Companies Used</h3>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+            <% couriers.forEach(c => { %>
+              <div style="background:var(--white);border:1px solid var(--mid-grey);border-radius:10px;padding:12px 18px;min-width:160px;">
+                <div style="font-size:13px;font-weight:700;color:var(--deep-blue);"><%= c.transport_company||'Unknown' %></div>
+                <div style="font-size:12px;color:var(--dark-grey);margin-top:2px;"><%= c.cnt %> dispatches</div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Full dispatch table -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title"><%= method === 'ICC Truck' ? '🚛' : method === 'Courier' ? '📦' : '🏪' %> <%= method %> — Dispatch Detail</span>
+          <span class="card-title"><%= method==='ICC Truck'?'🚛':method==='Courier'?'📦':'🏪' %> <%= method %> — All Dispatches (<%= dispatches.length %>)</span>
           <a href="/admin/export" class="btn btn-success btn-sm">⬇ Export CSV</a>
         </div>
         <div class="table-wrapper" style="overflow-x:auto;">
           <table style="min-width:900px;">
             <thead><tr>
               <th>Invoice #</th><th>Date</th><th>Customer</th><th>Packages</th>
-              <% if (method==='ICC Truck') { %><th>Truck</th><% } else { %><th>Company</th><% } %>
-              <th>Driver</th><th>Plate</th><th>Captured By</th><th>Status</th>
+              <th><%= method==='ICC Truck'?'Truck':'Company' %></th>
+              <th>Driver</th><th>Plate</th><th>Phone</th><th>Captured By</th><th>Status</th>
             </tr></thead>
             <tbody>
               <% dispatches.forEach(d => { %>
@@ -24,15 +65,16 @@
                   <td class="nowrap"><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
                   <td class="truncate" style="max-width:150px;"><%= d.acc_name %></td>
                   <td class="small"><%= d.total_packages||'—' %></td>
-                  <td><%= d.truck_name||d.transport_company||'—' %></td>
-                  <td><%= d.driver_first_name||d.driver_name||'' %> <%= d.driver_surname||'' %></td>
+                  <td><strong><%= d.truck_name||d.transport_company||'—' %></strong></td>
+                  <td><%= (d.driver_first_name||d.driver_name||'') + ' ' + (d.driver_surname||'') %></td>
                   <td><%= d.license_plate||'—' %></td>
+                  <td class="small"><%= d.driver_phone||'—' %></td>
                   <td><strong><%= d.captured_by||'—' %></strong></td>
                   <td><span class="badge <%=d.dispatch_status==='delivered'?'badge-success':d.dispatch_status==='dispatched'?'badge-info':'badge-warning'%>"><%= d.dispatch_status||'pending' %></span></td>
                 </tr>
               <% }) %>
-              <% if (dispatches.length===0) { %>
-                <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--dark-grey);">No records found.</td></tr>
+              <% if (!dispatches.length) { %>
+                <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--dark-grey);">No records found.</td></tr>
               <% } %>
             </tbody>
           </table>

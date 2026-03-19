@@ -1,0 +1,37 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📱 Notification Log</span>
+          <span style="font-size:12px;color:var(--dark-grey);"><%= logs.length %> entries</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Invoice</th><th>Customer</th><th>Channel</th><th>Recipient</th><th>Status</th><th>Sent At</th></tr></thead>
+            <tbody>
+              <% logs.forEach(l => { %>
+                <tr>
+                  <td><%= l.id %></td>
+                  <td><strong style="color:var(--deep-blue)">#<%= l.inv_number||'—' %></strong></td>
+                  <td class="truncate" style="max-width:140px;"><%= l.acc_name||'—' %></td>
+                  <td><span class="badge <%=l.channel==='sms'?'badge-info':l.channel==='whatsapp'?'badge-success':l.channel==='email'?'badge-warning':'badge-info'%>"><%= l.channel %></span></td>
+                  <td class="small"><%= l.recipient||'—' %></td>
+                  <td><span class="badge <%=l.status==='sent'?'badge-success':'badge-danger'%>"><%= l.status %></span></td>
+                  <td class="small nowrap"><%= l.sent_at ? new Date(l.sent_at).toLocaleString('en-ZA') : '—' %></td>
+                </tr>
+              <% }) %>
+              <% if (!logs.length) { %><tr><td colspan="7" style="text-align:center;padding:30px;color:var(--dark-grey);">No notifications sent yet.</td></tr><% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body></html>
