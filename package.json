@@ -1,6 +1,6 @@
 {
   "name": "icc-dispatch-system",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "ICC Dispatch Management System v5",
   "main": "server.js",
   "scripts": {
@@ -21,7 +21,8 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.7",
     "pg": "^8.11.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

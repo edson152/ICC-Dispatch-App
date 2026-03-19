@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dispatch Label #<%= dispatch.inv_number %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Poppins',sans-serif; background:#f4f6fa; padding:20px; }
+    .no-print { margin-bottom:16px; display:flex; gap:10px; }
+    .btn { padding:10px 20px; border-radius:8px; border:none; cursor:pointer; font-family:'Poppins',sans-serif; font-size:13px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+    .btn-blue { background:#1A4A9C; color:white; }
+    .btn-outline { background:white; border:2px solid #1A4A9C; color:#1A4A9C; }
+    .label {
+      background:white; border:2px solid #0D2B5E; border-radius:12px;
+      max-width:520px; margin:0 auto; overflow:hidden;
+      box-shadow:0 4px 20px rgba(0,0,0,0.1);
+    }
+    .label-header { background:#0D2B5E; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; }
+    .label-header h1 { color:white; font-size:16px; font-weight:800; }
+    .label-header p { color:rgba(255,255,255,0.6); font-size:11px; margin-top:2px; }
+    .label-body { display:flex; gap:0; }
+    .label-info { flex:1; padding:20px; }
+    .label-qr { padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid #e2e8f0; min-width:160px; }
+    .label-qr img { width:140px; height:140px; }
+    .qr-hint { font-size:10px; color:#718096; text-align:center; margin-top:8px; font-weight:600; }
+    .field { margin-bottom:10px; }
+    .field-label { font-size:9px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:2px; }
+    .field-value { font-size:13px; font-weight:700; color:#0D2B5E; }
+    .field-value.big { font-size:20px; color:#1A4A9C; }
+    .packages-box { background:#EBF8FF; border:2px solid #1A4A9C; border-radius:8px; padding:10px 14px; margin-top:12px; }
+    .packages-box .field-label { color:#1A4A9C; }
+    .packages-box .field-value { color:#0D2B5E; font-size:16px; }
+    .label-footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
+    .label-footer span { font-size:10px; color:#718096; }
+    @media print {
+      .no-print { display:none !important; }
+      body { background:white; padding:0; }
+      .label { box-shadow:none; max-width:100%; border-radius:0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print">
+  <button class="btn btn-blue" onclick="window.print()">🖨 Print Label</button>
+  <a href="/dispatch" class="btn btn-outline">← Back to Dispatch</a>
+  <a href="/pod/pending" class="btn btn-outline">📋 View Pending PODs</a>
+</div>
+
+<div class="label">
+  <div class="label-header">
+    <div>
+      <h1>DISPATCH LABEL</h1>
+      <p>Industrial Clothing Company — Scan when POD returns</p>
+    </div>
+    <div style="font-size:22px;color:rgba(255,255,255,0.4);">📦</div>
+  </div>
+
+  <div class="label-body">
+    <div class="label-info">
+      <div class="field">
+        <div class="field-label">Invoice Number</div>
+        <div class="field-value big">#<%= dispatch.inv_number %></div>
+      </div>
+      <div class="field">
+        <div class="field-label">Customer</div>
+        <div class="field-value"><%= dispatch.acc_name %></div>
+      </div>
+      <% if (dispatch.address) { %>
+      <div class="field">
+        <div class="field-label">Delivery Address</div>
+        <div class="field-value" style="font-size:12px;"><%= dispatch.address %><%= dispatch.city?', '+dispatch.city:'' %></div>
+      </div>
+      <% } %>
+      <div class="field">
+        <div class="field-label">Date</div>
+        <div class="field-value" style="font-size:12px;"><%= dispatch.inv_date?new Date(dispatch.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'long',year:'numeric'}):'—' %></div>
+      </div>
+      <% if (dispatch.delivery_method) { %>
+      <div class="field">
+        <div class="field-label">Delivery Method</div>
+        <div class="field-value" style="font-size:12px;"><%= dispatch.delivery_method %></div>
+      </div>
+      <% } %>
+      <div class="packages-box">
+        <div class="field-label">Total Packages</div>
+        <div class="field-value"><%= dispatch.total_packages||`${dispatch.bales||0} Bales · ${dispatch.boxes||0} Boxes · ${dispatch.grey_bags||0} Grey Bags` %></div>
+      </div>
+    </div>
+
+    <div class="label-qr">
+      <img src="<%= dataUrl %>" alt="QR Code">
+      <div class="qr-hint">SCAN TO CONFIRM<br>DELIVERY (POD)</div>
+      <div style="font-size:9px;color:#a0aec0;margin-top:6px;font-family:monospace;"><%= qr.qr_token %></div>
+    </div>
+  </div>
+
+  <div class="label-footer">
+    <span>Picker: <%= dispatch.picker||'—' %> · Packer: <%= dispatch.packer||'—' %> · Checker: <%= dispatch.checker||'—' %></span>
+    <span>Generated: <%= new Date().toLocaleDateString('en-ZA') %></span>
+  </div>
+</div>
+
+</body></html>

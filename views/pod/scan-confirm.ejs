@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm POD — #<%= qr.inv_number %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:#F4F6FA;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .card{background:white;border-radius:16px;padding:36px 32px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.1);}
+    .icon{font-size:56px;text-align:center;margin-bottom:16px;}
+    h2{color:#0D2B5E;font-size:20px;font-weight:800;text-align:center;margin-bottom:6px;}
+    p{color:#718096;font-size:13px;text-align:center;margin-bottom:24px;}
+    .info-box{background:#EBF8FF;border-radius:10px;padding:14px 16px;margin-bottom:24px;}
+    .info-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(74,144,217,0.15);font-size:13px;}
+    .info-row:last-child{border-bottom:none;}
+    .info-label{color:#718096;}
+    .info-value{font-weight:700;color:#0D2B5E;}
+    .form-row{margin-bottom:16px;}
+    label{display:block;font-size:11px;font-weight:700;color:#0D2B5E;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+    input,select{width:100%;padding:10px 14px;border:2px solid #E2E8F0;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;}
+    input:focus,select:focus{border-color:#4A90D9;}
+    .btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;}
+    .btn-confirm{background:linear-gradient(135deg,#0D2B5E,#1A4A9C);color:white;}
+    .btn-confirm:hover{opacity:0.9;}
+    .file-hint{font-size:11px;color:#718096;margin-top:4px;}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">📋</div>
+  <h2>Confirm POD Return</h2>
+  <p>Scanning this QR marks Invoice #<%= qr.inv_number %> as <strong>delivered</strong> and archives it to the completed logs.</p>
+
+  <div class="info-box">
+    <div class="info-row"><span class="info-label">Invoice #</span><span class="info-value">#<%= qr.inv_number %></span></div>
+    <div class="info-row"><span class="info-label">Customer</span><span class="info-value"><%= qr.acc_name %></span></div>
+  </div>
+
+  <form method="POST" action="/pod/scan/<%= qr.qr_token %>" enctype="multipart/form-data">
+    <div class="form-row">
+      <label>Your Name (who is scanning)</label>
+      <input type="text" name="scanned_by" placeholder="Your name" required
+        value="<%= typeof user !== 'undefined' && user ? user.name : '' %>">
+    </div>
+    <div class="form-row">
+      <label>Attach POD Scan / Photo (optional)</label>
+      <input type="file" name="pod_photo" accept="image/*,.pdf" capture="environment">
+      <div class="file-hint">Take a photo of the signed POD or upload a scan</div>
+    </div>
+    <button type="submit" class="btn btn-confirm">✅ Confirm POD Received</button>
+  </form>
+</div>
+</body></html>

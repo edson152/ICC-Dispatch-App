@@ -32,7 +32,7 @@
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Packages</th><th>Delivery</th><th>Transport</th><th>Picker</th><th>Packer</th><th>Checker</th><th>Status</th><th>Capture</th><th>Receipt</th></tr></thead>
+            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Packages</th><th>Delivery</th><th>Transport</th><th>Picker</th><th>Packer</th><th>Checker</th><th>Status</th><th>Capture</th><th>Receipt</th><th>QR Label</th></tr></thead>
             <tbody>
               <% dispatches.forEach(d => { %>
                 <% const hasTransport = d.transport_company && d.transport_company.trim()!==''; %>
@@ -54,6 +54,7 @@
                   <td><span class="badge <%=hasTransport?'badge-success':'badge-warning'%>"><%=d.dispatch_status==='dispatched'?'🚚 Out':'⏳ Pending'%></span></td>
                   <td><a href="/dispatch/capture/<%= d.inv_number %>" class="btn btn-blue btn-sm"><%= hasTransport?'✏ Edit':'➕ Capture' %></a></td>
                   <td><a href="/receipts/new/<%= d.inv_number %>" class="btn btn-sm btn-outline">🧾</a></td>
+                  <td><a href="/pod/label/<%= d.inv_number %>" target="_blank" class="btn btn-sm btn-outline" title="Print dispatch label with QR code">🏷 Label</a></td>
                 </tr>
               <% }) %>
               <% if (dispatches.length===0) { %>

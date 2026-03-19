@@ -6,44 +6,9 @@
     <div class="page-body">
       <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
 
-      <div class="card" style="margin-bottom:24px;">
-        <div class="card-header">
-          <span class="card-title">📋 Invoice Edit Log — Employee &amp; Admin Changes</span>
-          <span style="font-size:12px;color:var(--dark-grey);"><%= editLogs.length %> entries</span>
-        </div>
-        <div class="table-wrapper" style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th><th>Invoice #</th><th>Edited By</th><th>Edit Type</th><th>Changes Made</th><th>Date &amp; Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% editLogs.forEach(e => { %>
-                <tr>
-                  <td><%= e.id %></td>
-                  <td><strong style="color:var(--deep-blue)">#<%= e.inv_number %></strong></td>
-                  <td><strong style="color:var(--medium-blue)"><%= e.edited_by %></strong></td>
-                  <td>
-                    <span class="badge <%= e.edit_type==='ADMIN_FULL_EDIT'?'badge-danger':e.edit_type==='CREATE_INVOICE'?'badge-success':'badge-info' %>">
-                      <%= e.edit_type %>
-                    </span>
-                  </td>
-                  <td style="max-width:300px;font-size:12px;color:var(--dark-grey);"><%= e.changes_detail || '—' %></td>
-                  <td class="small nowrap"><%= new Date(e.edited_at).toLocaleString('en-ZA') %></td>
-                </tr>
-              <% }) %>
-              <% if (editLogs.length === 0) { %>
-                <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--dark-grey);">No edit logs found.</td></tr>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <div class="card">
         <div class="card-header">
-          <span class="card-title">🔍 System Audit Log — All Actions</span>
+          <span class="card-title">🔍 System Audit Log</span>
           <span style="font-size:12px;color:var(--dark-grey);"><%= logs.length %> entries</span>
         </div>
         <div class="table-wrapper" style="overflow-x:auto;">
@@ -57,15 +22,15 @@
               <% logs.forEach(l => { %>
                 <tr>
                   <td><%= l.id %></td>
-                  <td><strong style="color:var(--medium-blue)"><%= l.user_name || '—' %></strong></td>
-                  <td><span class="badge <%= l.user_role==='admin'?'badge-danger':'badge-info' %>"><%= l.user_role || '—' %></span></td>
+                  <td><strong style="color:var(--medium-blue)"><%= l.user_name||'—' %></strong></td>
+                  <td><span class="badge <%=l.user_role==='admin'?'badge-danger':l.user_role==='driver'?'badge-warning':'badge-info'%>"><%= l.user_role||'—' %></span></td>
                   <td><span style="font-family:monospace;font-size:12px;background:var(--soft-grey);padding:2px 6px;border-radius:4px;"><%= l.action %></span></td>
-                  <td style="font-size:12px;color:var(--dark-grey);max-width:300px;"><%= l.detail || '—' %></td>
+                  <td style="font-size:12px;color:var(--dark-grey);max-width:300px;"><%= l.detail||'—' %></td>
                   <td class="small nowrap"><%= new Date(l.created_at).toLocaleString('en-ZA') %></td>
                 </tr>
               <% }) %>
-              <% if (logs.length === 0) { %>
-                <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--dark-grey);">No audit entries found.</td></tr>
+              <% if (!logs.length) { %>
+                <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--dark-grey);">No audit entries yet.</td></tr>
               <% } %>
             </tbody>
           </table>
@@ -76,5 +41,4 @@
   </div>
 </div>
 <script src="/js/app.js"></script>
-</body>
-</html>
+</body></html>

@@ -1,0 +1,105 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;display:flex;gap:10px;align-items:center;">
+        <a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a>
+        <span style="font-size:13px;color:var(--dark-grey);">These disappear once the POD is scanned back</span>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 Pending PODs — Awaiting QR Scan <span class="badge badge-warning"><%= pending.length %></span></span>
+          <a href="/pod/logs" class="btn btn-outline btn-sm">📁 View Completed Archive</a>
+        </div>
+
+        <% if (!pending.length) { %>
+          <div style="text-align:center;padding:60px;color:var(--dark-grey);">
+            <div style="font-size:56px;margin-bottom:12px;">🎉</div>
+            <p style="font-size:15px;font-weight:600;">All PODs accounted for!</p>
+            <p style="font-size:13px;margin-top:4px;">No pending QR codes — everything has been scanned.</p>
+          </div>
+        <% } else { %>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Packages</th>
+                <th>Delivery</th>
+                <th>Transport</th>
+                <th>QR Label</th>
+                <th>Printed</th>
+                <th>Manual Scan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% pending.forEach(p => { %>
+                <tr id="row-<%= p.inv_number %>">
+                  <td><strong style="color:var(--deep-blue)">#<%= p.inv_number %></strong></td>
+                  <td class="truncate" style="max-width:150px;" title="<%= p.acc_name %>"><%= p.acc_name %></td>
+                  <td class="nowrap"><%= p.inv_date?new Date(p.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}):'—' %></td>
+                  <td class="small"><%= p.total_packages||'—' %></td>
+                  <td><span class="badge badge-info"><%= p.delivery_method||'—' %></span></td>
+                  <td class="small"><%= p.transport_company||'—' %></td>
+                  <td>
+                    <a href="/pod/label/<%= p.inv_number %>" target="_blank" class="btn btn-blue btn-sm">🖨 Print Label</a>
+                  </td>
+                  <td>
+                    <span class="badge <%=p.printed?'badge-success':'badge-warning'%>">
+                      <%= p.printed?'✔ Yes':'Not yet' %>
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline" onclick="manualScan(<%= p.inv_number %>)" title="Mark as received without physical scan">
+                      ✅ Mark Done
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+
+      <div style="margin-top:16px;background:rgba(74,144,217,0.07);border:1px solid rgba(74,144,217,0.2);border-radius:10px;padding:16px 20px;font-size:13px;color:var(--medium-blue);">
+        <strong>How it works:</strong><br>
+        1. Click <strong>🖨 Print Label</strong> on any dispatch — a label with a QR code prints<br>
+        2. Attach the label to the goods before they go out<br>
+        3. When the POD comes back, scan the QR code with any phone camera<br>
+        4. The system auto-marks the order as delivered and moves it to the <a href="/pod/logs" style="color:var(--deep-blue);font-weight:700;">completed archive</a><br>
+        5. The row disappears from this list automatically
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+async function manualScan(invNum) {
+  if (!confirm(`Mark Invoice #${invNum} as POD received (manual scan)?`)) return;
+  try {
+    const r = await fetch(`/pod/scan-manual/${invNum}`, { method: 'POST' });
+    const data = await r.json();
+    if (data.ok) {
+      const row = document.getElementById('row-' + invNum);
+      if (row) {
+        row.style.transition = 'opacity 0.5s';
+        row.style.opacity = '0';
+        setTimeout(() => row.remove(), 500);
+      }
+    } else {
+      alert(data.error || 'Error marking as done');
+    }
+  } catch(e) {
+    alert('Error. Please try again.');
+  }
+}
+</script>
+<script src="/js/app.js"></script>
+</body></html>

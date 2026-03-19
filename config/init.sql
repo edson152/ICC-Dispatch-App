@@ -216,3 +216,46 @@ INSERT INTO system_settings (key, value, updated_by) VALUES
   ('sage_user',             '',      'system'),
   ('tracking_enabled',      'true',  'system')
 ON CONFLICT (key) DO NOTHING;
+
+-- ── QR CODES & POD LOGS ───────────────────────────────────────────────────────
+
+-- QR dispatch labels (one per invoice)
+CREATE TABLE IF NOT EXISTS dispatch_qr (
+  id SERIAL PRIMARY KEY,
+  inv_number BIGINT UNIQUE REFERENCES dispatch_records(inv_number) ON DELETE CASCADE,
+  qr_token VARCHAR(32) UNIQUE NOT NULL,
+  generated_at TIMESTAMP DEFAULT NOW(),
+  printed BOOLEAN DEFAULT FALSE,
+  scanned BOOLEAN DEFAULT FALSE,
+  scanned_at TIMESTAMP,
+  scanned_by VARCHAR(100)
+);
+
+-- Completed POD archive (permanent log — nothing deleted from here)
+CREATE TABLE IF NOT EXISTS pod_logs (
+  id SERIAL PRIMARY KEY,
+  inv_number BIGINT NOT NULL,
+  acc_name VARCHAR(255),
+  acc_no VARCHAR(50),
+  inv_date DATE,
+  total_packages VARCHAR(255),
+  delivery_method VARCHAR(100),
+  transport_company VARCHAR(150),
+  driver_name VARCHAR(200),
+  license_plate VARCHAR(30),
+  captured_by VARCHAR(100),
+  dispatched_at TIMESTAMP,
+  delivered_at TIMESTAMP,
+  pod_scan_path VARCHAR(255),
+  receipt_condition VARCHAR(50),
+  received_by VARCHAR(150),
+  archived_at TIMESTAMP DEFAULT NOW(),
+  archived_by VARCHAR(100)
+);
+
+-- Add pod_scan_path to dispatch_records if missing
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='pod_scan_path') THEN
+    ALTER TABLE dispatch_records ADD COLUMN pod_scan_path VARCHAR(255);
+  END IF;
+END $$;

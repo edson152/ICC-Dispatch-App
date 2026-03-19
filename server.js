@@ -88,6 +88,7 @@ app.use('/trucks',     require('./routes/trucks'));
 app.use('/track',      require('./routes/tracking'));
 app.use('/driver',     require('./routes/driver'));
 app.use('/returns',    require('./routes/returns'));
+app.use('/pod',        require('./routes/pod'));
 
 // SMS reply webhook handled inside /track route
 
