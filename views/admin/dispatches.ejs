@@ -8,22 +8,28 @@
 
       <form method="GET" action="/admin/dispatches" class="filter-bar">
         <div class="search-wrap">
-          <input class="search-input" type="text" name="search" value="<%= search %>" placeholder="Search invoice, customer, transport company...">
+          <input class="search-input" type="text" name="search" value="<%= search %>" placeholder="Search invoice, customer, driver, plate, tracking...">
         </div>
         <select class="form-control" name="delivery" style="width:auto;">
-          <option value="">All Delivery Methods</option>
-          <option value="ICC Truck" <%= delivery==='ICC Truck'?'selected':'' %>>ICC Truck</option>
-          <option value="Courier" <%= delivery==='Courier'?'selected':'' %>>Courier</option>
-          <option value="Collection" <%= delivery==='Collection'?'selected':'' %>>Collection</option>
+          <option value="">All Methods</option>
+          <option value="ICC Truck" <%=delivery==='ICC Truck'?'selected':''%>>ICC Truck</option>
+          <option value="Courier" <%=delivery==='Courier'?'selected':''%>>Courier</option>
+          <option value="Collection" <%=delivery==='Collection'?'selected':''%>>Collection</option>
         </select>
         <select class="form-control" name="status" style="width:auto;">
           <option value="">All Statuses</option>
-          <option value="pending" <%= status==='pending'?'selected':'' %>>Pending</option>
-          <option value="complete" <%= status==='complete'?'selected':'' %>>Complete</option>
+          <option value="pending" <%=status==='pending'?'selected':''%>>⏳ Pending</option>
+          <option value="dispatched" <%=status==='dispatched'?'selected':''%>>🚚 Dispatched</option>
+          <option value="delivered" <%=status==='delivered'?'selected':''%>>✅ Delivered</option>
         </select>
+        <input type="date" class="form-control" name="date_from" value="<%= date_from||'' %>" style="width:auto;" title="From date">
+        <input type="date" class="form-control" name="date_to" value="<%= date_to||'' %>" style="width:auto;" title="To date">
         <button type="submit" class="btn btn-blue btn-sm">Search</button>
         <a href="/admin/dispatches" class="btn btn-outline btn-sm">Clear</a>
-        <a href="/admin/export" class="btn btn-success btn-sm">⬇ Export CSV</a>
+        <a href="/admin/export" class="btn btn-success btn-sm">⬇ CSV</a>
+        <a href="/admin/export-excel" class="btn btn-success btn-sm">📊 Excel</a>
+        <a href="/admin/batch-labels" class="btn btn-outline btn-sm">🏷 Labels</a>
+        <a href="/admin/daily-sheet" class="btn btn-outline btn-sm">📄 Sheet</a>
       </form>
 
       <div class="card">

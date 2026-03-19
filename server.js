@@ -44,10 +44,40 @@ initDB();
   fs.mkdirSync(path.join(__dirname,'public','uploads',d),{recursive:true});
 });
 
-// Daily report cron (runs at 8am daily)
+// ── CRON JOBS ────────────────────────────────────────────────────────────────
+
+// Daily report at 8am
 cron.schedule('0 8 * * *', async () => {
-  const { sendDailyReport } = require('./services/notifications');
-  await sendDailyReport();
+  try { const { sendDailyReport } = require('./services/notifications'); await sendDailyReport(); } catch(e){}
+});
+
+// Item 29: DB backup email at midnight (exports data summary to admin)
+cron.schedule('0 0 * * *', async () => {
+  if (!process.env.ADMIN_EMAIL || !process.env.SMTP_USER) return;
+  try {
+    const { sendEmail } = require('./services/notifications');
+    const [dispCount, receiptCount, podCount] = await Promise.all([
+      db.query('SELECT COUNT(*) as cnt FROM dispatch_records'),
+      db.query('SELECT COUNT(*) as cnt FROM delivery_receipts'),
+      db.query('SELECT COUNT(*) as cnt FROM pod_logs')
+    ]);
+    const today = new Date().toISOString().slice(0,10);
+    await sendEmail(process.env.ADMIN_EMAIL,
+      `ICC Dispatch — Nightly Backup Summary ${today}`,
+      `<div style="font-family:sans-serif;padding:20px;max-width:500px;">
+        <h3 style="color:#0D2B5E;">🗃 Nightly Database Summary</h3>
+        <p style="color:#718096;font-size:13px;">Date: ${today}</p>
+        <table style="width:100%;border-collapse:collapse;margin-top:16px;">
+          <tr style="background:#0D2B5E;"><td colspan="2" style="padding:10px;color:white;font-weight:700;">Record Counts</td></tr>
+          <tr><td style="padding:8px;color:#718096;">Dispatch Records</td><td style="padding:8px;font-weight:700;">${dispCount.rows[0].cnt}</td></tr>
+          <tr style="background:#f7fafc"><td style="padding:8px;color:#718096;">Delivery Receipts</td><td style="padding:8px;font-weight:700;">${receiptCount.rows[0].cnt}</td></tr>
+          <tr><td style="padding:8px;color:#718096;">POD Archive</td><td style="padding:8px;font-weight:700;">${podCount.rows[0].cnt}</td></tr>
+        </table>
+        <p style="color:#718096;font-size:12px;margin-top:16px;">For a full database backup, set up pg_dump on your server as described in LOCAL_HOSTING_GUIDE.md.</p>
+      </div>`
+    );
+    console.log('✅ Nightly backup summary sent');
+  } catch(e){ console.error('Backup email error:', e.message); }
 });
 
 app.set('view engine','ejs');
@@ -61,11 +91,12 @@ app.set('trust proxy',1);
 
 app.use(session({
   secret: process.env.SESSION_SECRET||'icc_secret_2024',
-  resave:false,saveUninitialized:false,
-  cookie:{secure:false,httpOnly:true,maxAge:8*60*60*1000}
+  resave:false, saveUninitialized:false,
+  cookie:{ secure:false, httpOnly:true, maxAge:8*60*60*1000 }
 }));
 app.use(flash());
 
+// Item 30: Log all admin actions
 app.use(async(req,res,next)=>{
   res.locals.user    = req.session.user||null;
   res.locals.success = req.flash('success');
@@ -76,6 +107,13 @@ app.use(async(req,res,next)=>{
       res.locals.pendingCount=parseInt(r.rows[0].cnt);
     }catch(e){res.locals.pendingCount=0;}
   } else { res.locals.pendingCount=0; }
+  // Log admin POST/DELETE actions
+  if(req.session.user?.role==='admin' && ['POST','DELETE','PUT'].includes(req.method) && req.path.startsWith('/admin')){
+    try{
+      await db.query('INSERT INTO audit_log (user_name,user_role,action,detail) VALUES ($1,$2,$3,$4)',
+        [req.session.user.name,'admin',`ADMIN_${req.method}`,`${req.method} ${req.path}`]);
+    }catch(e){}
+  }
   next();
 });
 
@@ -90,8 +128,17 @@ app.use('/driver',     require('./routes/driver'));
 app.use('/returns',    require('./routes/returns'));
 app.use('/pod',        require('./routes/pod'));
 
-// SMS reply webhook handled inside /track route
+// 404
+app.use((req,res) => { res.status(404).render('404',{title:'404 — Not Found'}); });
 
-app.use((req,res)=>{ res.status(404).render('404',{title:'404 — Not Found'}); });
+// Item 4: Global 500 error handler
+app.use((err, req, res, next) => {
+  console.error('500 Error:', err.stack || err.message);
+  try {
+    res.status(500).render('500', { title: '500 — Server Error', error: err });
+  } catch(e) {
+    res.status(500).send('<h1>Server Error</h1><p>Please try again or contact support.</p>');
+  }
+});
 
-app.listen(PORT,()=>{ console.log(`🚚 ICC Dispatch v5 running on port ${PORT}`); });
+app.listen(PORT,()=>{ console.log(`🚚 ICC Dispatch v7 running on port ${PORT}`); });

@@ -1,0 +1,32 @@
+<%- include('partials/head') %>
+<div class="app-layout">
+  <%- include('partials/sidebar') %>
+  <div class="main-content">
+    <%- include('partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+      <div class="card" style="max-width:440px;">
+        <div class="card-header"><span class="card-title">🔑 Change My PIN</span></div>
+        <div class="card-body">
+          <form method="POST" action="/change-pin">
+            <div class="form-row">
+              <label class="required">Current PIN</label>
+              <input class="form-control pin-input" type="password" name="current_pin" maxlength="4" placeholder="••••" pattern="\d{4}" inputmode="numeric" required oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+            <div class="form-row">
+              <label class="required">New PIN</label>
+              <input class="form-control pin-input" type="password" name="new_pin" maxlength="4" placeholder="••••" pattern="\d{4}" inputmode="numeric" required oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+            <div class="form-row">
+              <label class="required">Confirm New PIN</label>
+              <input class="form-control pin-input" type="password" name="confirm_pin" maxlength="4" placeholder="••••" pattern="\d{4}" inputmode="numeric" required oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+            <button type="submit" class="btn btn-blue">🔑 Change PIN</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/js/app.js"></script>
+</body></html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch Labels — <%= date %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:#f4f6fa;padding:20px;}
+    .no-print{margin-bottom:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn-blue{background:#1A4A9C;color:white;}
+    .btn-outline{background:white;border:2px solid #1A4A9C;color:#1A4A9C;}
+    .labels-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+    .label{background:white;border:2px solid #0D2B5E;border-radius:10px;overflow:hidden;page-break-inside:avoid;}
+    .label-header{background:#0D2B5E;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+    .label-header h3{color:white;font-size:13px;font-weight:800;}
+    .label-header span{color:rgba(255,255,255,0.6);font-size:11px;}
+    .label-body{display:flex;gap:0;}
+    .label-info{flex:1;padding:12px 14px;}
+    .label-qr{padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-left:1px solid #e2e8f0;min-width:120px;}
+    .label-qr img{width:100px;height:100px;}
+    .qr-hint{font-size:9px;color:#718096;text-align:center;margin-top:4px;font-weight:700;text-transform:uppercase;}
+    .f{margin-bottom:6px;}
+    .fl{font-size:9px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:0.5px;}
+    .fv{font-size:12px;font-weight:700;color:#0D2B5E;}
+    .pkgs{background:#EBF8FF;border-radius:6px;padding:6px 10px;margin-top:8px;}
+    .label-footer{background:#f8fafc;border-top:1px solid #e2e8f0;padding:6px 14px;font-size:9px;color:#718096;display:flex;justify-content:space-between;}
+    .date-picker{display:flex;gap:10px;align-items:center;}
+    .date-picker input{padding:8px 12px;border:2px solid #e2e8f0;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;}
+    @media print{
+      .no-print{display:none!important;}
+      body{background:white;padding:0;}
+      .labels-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+    }
+  </style>
+</head>
+<body>
+<div class="no-print">
+  <div class="date-picker">
+    <label style="font-size:13px;font-weight:600;">Date:</label>
+    <input type="date" id="dateInput" value="<%= date %>" onchange="location.href='/admin/batch-labels?date='+this.value">
+  </div>
+  <button class="btn btn-blue" onclick="window.print()">🖨 Print All <%= qrs.length %> Labels</button>
+  <a href="/admin/dispatches" class="btn btn-outline">← Back</a>
+  <span style="font-size:13px;color:#718096;"><%= qrs.length %> label(s) for <%= date %></span>
+</div>
+
+<% if (!qrs.length) { %>
+  <div style="text-align:center;padding:60px;color:#718096;background:white;border-radius:12px;">
+    <div style="font-size:48px;margin-bottom:12px;">📋</div>
+    <p style="font-size:15px;font-weight:600;">No dispatches for this date</p>
+  </div>
+<% } else { %>
+<div class="labels-grid">
+  <% qrs.forEach(({dispatch:d, qr, dataUrl}) => { %>
+  <div class="label">
+    <div class="label-header">
+      <h3>DISPATCH LABEL · #<%= d.inv_number %></h3>
+      <span><%= d.inv_date?new Date(d.inv_date).toLocaleDateString('en-ZA'):'—' %></span>
+    </div>
+    <div class="label-body">
+      <div class="label-info">
+        <div class="f"><div class="fl">Customer</div><div class="fv"><%= d.acc_name %></div></div>
+        <% if(d.address){%><div class="f"><div class="fl">Address</div><div class="fv" style="font-size:11px;"><%= d.address %><%= d.city?', '+d.city:'' %></div></div><%}%>
+        <div class="f"><div class="fl">Delivery</div><div class="fv" style="font-size:11px;"><%= d.delivery_method %></div></div>
+        <div class="pkgs">
+          <div class="fl">Packages</div>
+          <div class="fv"><%= d.total_packages||`${d.bales||0}B · ${d.boxes||0}Bx · ${d.grey_bags||0}GB` %></div>
+        </div>
+      </div>
+      <div class="label-qr">
+        <img src="<%= dataUrl %>" alt="QR">
+        <div class="qr-hint">Scan POD<br>on return</div>
+      </div>
+    </div>
+    <div class="label-footer">
+      <span>Picker: <%= d.picker||'—' %> · Packer: <%= d.packer||'—' %> · Checker: <%= d.checker||'—' %></span>
+      <span><%= qr.qr_token.slice(0,8) %></span>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } %>
+</body></html>

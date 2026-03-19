@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<div class="app-layout"><%- include('../partials/sidebar') %><div class="main-content"><%- include('../partials/topbar') %>
+<div class="page-body">
+  <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">🔍 Customer Search</span></div>
+    <div class="card-body">
+      <form method="GET" action="/admin/customer-search" style="display:flex;gap:10px;margin-bottom:20px;">
+        <input class="form-control" name="q" value="<%= search %>" placeholder="Search by name, account number, email or phone..." style="max-width:480px;" autofocus>
+        <button type="submit" class="btn btn-blue">Search</button>
+      </form>
+      <% if (search && !customers.length) { %>
+        <div style="text-align:center;padding:40px;color:var(--dark-grey);">No customers found for "<%= search %>"</div>
+      <% } %>
+      <% if (customers.length) { %>
+        <div class="employee-grid">
+          <% customers.forEach(c => { %>
+            <a href="/admin/customer/<%= c.acc_no %>" style="text-decoration:none;" class="employee-card">
+              <div class="emp-avatar"><%= c.acc_name.charAt(0).toUpperCase() %></div>
+              <div class="emp-info">
+                <div class="emp-name"><%= c.acc_name %></div>
+                <div class="emp-role"><%= c.acc_no %></div>
+                <div style="font-size:11px;color:var(--dark-grey);margin-top:2px;"><%= c.email||'' %> <%= c.phone?'· '+c.phone:'' %></div>
+              </div>
+              <span class="badge badge-info"><%= c.order_count %> orders</span>
+            </a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div></div></div>
+<script src="/js/app.js"></script></body></html>

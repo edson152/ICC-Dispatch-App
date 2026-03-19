@@ -5,6 +5,9 @@
     <%- include('../partials/topbar') %>
     <div class="page-body">
 
+      <!-- Week comparison (loaded async) -->
+      <div id="weekStats" style="margin-bottom:16px;"></div>
+
       <!-- Stats -->
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-icon blue">📦</div><div><div class="stat-label">Total Dispatches</div><div class="stat-value"><%= stats.total %></div></div></div>

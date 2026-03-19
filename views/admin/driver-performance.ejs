@@ -1,0 +1,36 @@
+<%- include('../partials/head') %>
+<div class="app-layout"><%- include('../partials/sidebar') %><div class="main-content"><%- include('../partials/topbar') %>
+<div class="page-body">
+  <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">🚛 Driver Performance Report</span></div>
+    <div class="table-wrapper"><table>
+      <thead><tr><th>Vehicle / Truck</th><th>Driver</th><th>Method</th><th>Total</th><th>Completed</th><th>In Progress</th><th>Avg Time (hrs)</th><th>Total Value</th><th>Success Rate</th></tr></thead>
+      <tbody>
+        <% drivers.forEach(d => { %>
+          <% const rate = d.total_deliveries>0?Math.round(d.completed/d.total_deliveries*100):0; %>
+          <tr>
+            <td><strong><%= d.vehicle %></strong></td>
+            <td><%= d.driver %></td>
+            <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
+            <td><%= d.total_deliveries %></td>
+            <td><span class="badge badge-success"><%= d.completed %></span></td>
+            <td><span class="badge badge-warning"><%= d.in_progress %></span></td>
+            <td><%= d.avg_hours||'—' %></td>
+            <td>R <%= parseFloat(d.total_value||0).toLocaleString('en-ZA',{minimumFractionDigits:0}) %></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="background:var(--mid-grey);border-radius:4px;height:8px;width:80px;overflow:hidden;flex-shrink:0;">
+                  <div style="background:<%=rate>=90?'var(--success)':rate>=70?'var(--warning)':'var(--danger)'%>;height:100%;width:<%= rate %>%;border-radius:4px;"></div>
+                </div>
+                <span style="font-size:12px;font-weight:700;"><%= rate %>%</span>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!drivers.length) { %><tr><td colspan="9" style="text-align:center;padding:30px;color:var(--dark-grey);">No driver data yet.</td></tr><% } %>
+      </tbody>
+    </table></div>
+  </div>
+</div></div></div>
+<script src="/js/app.js"></script></body></html>

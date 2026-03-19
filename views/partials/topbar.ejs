@@ -1,10 +1,25 @@
 <div class="topbar">
-  <div class="topbar-title"><%= title %></div>
+  <div class="topbar-left">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-title"><%= title %></div>
+  </div>
   <div class="topbar-right">
-    <div class="topbar-datetime" id="topbarClock"></div>
-    <div class="topbar-db">Dispatch Management System</div>
+    <div style="text-align:right;">
+      <div class="topbar-datetime" id="topbarClock"></div>
+      <div class="topbar-db">Dispatch Management System</div>
+    </div>
+    <button class="dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 Dark</button>
+    <% if (user && user.role === 'employee') { %>
+      <a href="/change-pin" class="btn btn-outline btn-sm" title="Change my PIN">🔑</a>
+    <% } %>
+    <% if (user && user.role === 'admin') { %>
+      <a href="/change-password" class="btn btn-outline btn-sm" title="Change password">🔒</a>
+    <% } %>
   </div>
 </div>
+<div class="sidebar-overlay"></div>
 
 <% if (success && success.length > 0) { %>
   <div class="alert alert-success"><span>✅</span> <%= success[0] %></div>

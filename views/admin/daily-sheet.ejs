@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Daily Dispatch Sheet — <%= date %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Poppins',sans-serif;background:#f4f6fa;padding:20px;font-size:12px;}
+    .no-print{margin-bottom:16px;display:flex;gap:10px;}
+    .btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+    .btn-blue{background:#1A4A9C;color:white;} .btn-outline{background:white;border:2px solid #1A4A9C;color:#1A4A9C;}
+    .sheet{background:white;border-radius:10px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+    .sheet-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #0D2B5E;}
+    .sheet-title h2{font-size:18px;font-weight:800;color:#0D2B5E;}
+    .sheet-title p{font-size:11px;color:#718096;margin-top:2px;}
+    .sheet-meta{text-align:right;font-size:11px;color:#718096;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{background:#0D2B5E;color:white;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:left;}
+    tbody tr{border-bottom:1px solid #f0f0f0;}
+    tbody tr:hover{background:#f8fafc;}
+    tbody td{padding:7px 10px;font-size:11px;vertical-align:middle;}
+    .totals-row{background:#EBF8FF!important;font-weight:700;}
+    .totals-row td{padding:10px;color:#0D2B5E;font-size:12px;}
+    .sig-col{border:1px solid #e2e8f0;min-width:80px;height:30px;}
+    .method-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;background:#EBF8FF;color:#1A4A9C;}
+    .date-picker{display:flex;gap:8px;align-items:center;}
+    .date-picker input{padding:6px 10px;border:2px solid #e2e8f0;border-radius:6px;font-family:'Poppins',sans-serif;font-size:12px;}
+    @media print{
+      .no-print{display:none!important;}
+      body{background:white;padding:10px;}
+      .sheet{box-shadow:none;padding:0;}
+    }
+  </style>
+</head>
+<body>
+<div class="no-print">
+  <div class="date-picker">
+    <label style="font-size:12px;font-weight:600;">Date:</label>
+    <input type="date" value="<%= date %>" onchange="location.href='/admin/daily-sheet?date='+this.value">
+  </div>
+  <button class="btn btn-blue" onclick="window.print()">🖨 Print Sheet</button>
+  <a href="/admin/dispatches" class="btn btn-outline">← Back</a>
+</div>
+
+<div class="sheet">
+  <div class="sheet-header">
+    <div class="sheet-title">
+      <h2>DAILY DISPATCH SHEET</h2>
+      <p>Industrial Clothing Company · <%= new Date(date+'T00:00:00').toLocaleDateString('en-ZA',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}) %></p>
+    </div>
+    <div class="sheet-meta">
+      <div style="font-size:14px;font-weight:800;color:#0D2B5E;"><%= dispatches.length %> orders</div>
+      <div>Printed: <%= new Date().toLocaleString('en-ZA') %></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Invoice</th><th>Customer</th><th>Boxes</th><th>Bales</th><th>Grey Bags</th><th>Weight</th><th>Method</th><th>Transport</th><th>Driver</th><th>Plate</th><th>Status</th><th>Signature</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% dispatches.forEach((d,i) => { %>
+      <tr>
+        <td><%= i+1 %></td>
+        <td><strong>#<%= d.inv_number %></strong></td>
+        <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= d.acc_name %></td>
+        <td style="text-align:center;"><%= d.boxes||0 %></td>
+        <td style="text-align:center;font-weight:700;color:#1A4A9C;"><%= d.bales||0 %></td>
+        <td style="text-align:center;"><%= d.grey_bags||0 %></td>
+        <td><%= d.weight?parseFloat(d.weight).toFixed(1)+'kg':'—' %></td>
+        <td><span class="method-badge"><%= d.delivery_method %></span></td>
+        <td style="font-size:10px;"><%= d.transport_company||d.truck_name||'—' %></td>
+        <td style="font-size:10px;"><%= d.driver_first_name?d.driver_first_name+' '+(d.driver_surname||''):'—' %></td>
+        <td style="font-size:10px;"><%= d.license_plate||'—' %></td>
+        <td><span class="method-badge" style="background:<%=d.dispatch_status==='delivered'?'rgba(56,161,105,0.12)':d.dispatch_status==='dispatched'?'rgba(74,144,217,0.12)':'rgba(214,158,46,0.12)'%>;color:<%=d.dispatch_status==='delivered'?'#38A169':d.dispatch_status==='dispatched'?'#1A4A9C':'#D69E2E'%>;"><%= d.dispatch_status||'pending' %></span></td>
+        <td class="sig-col"></td>
+      </tr>
+      <% }) %>
+      <tr class="totals-row">
+        <td colspan="3" style="text-align:right;">TOTALS:</td>
+        <td style="text-align:center;"><%= totals.boxes %></td>
+        <td style="text-align:center;"><%= totals.bales %></td>
+        <td style="text-align:center;"><%= totals.bags %></td>
+        <td><%= totals.weight.toFixed(1) %>kg</td>
+        <td colspan="4">Total Value: R <%= totals.value.toLocaleString('en-ZA',{minimumFractionDigits:2}) %></td>
+        <td colspan="2"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:24px;display:flex;gap:40px;">
+    <div style="flex:1;border-top:1px solid #000;padding-top:6px;font-size:11px;color:#718096;">Prepared By</div>
+    <div style="flex:1;border-top:1px solid #000;padding-top:6px;font-size:11px;color:#718096;">Authorized By</div>
+    <div style="flex:1;border-top:1px solid #000;padding-top:6px;font-size:11px;color:#718096;">Date</div>
+  </div>
+</div>
+</body></html>
