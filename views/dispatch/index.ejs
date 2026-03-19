@@ -6,105 +6,94 @@
     <div class="page-body">
 
       <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-icon blue">📦</div>
-          <div><div class="stat-label">Total Orders</div><div class="stat-value"><%= stats.total %></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon green">✅</div>
-          <div><div class="stat-label">Transport Captured</div><div class="stat-value"><%= stats.complete %></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">⏳</div>
-          <div><div class="stat-label">Pending Details</div><div class="stat-value"><%= stats.pending %></div></div>
-        </div>
+        <div class="stat-card"><div class="stat-icon blue">📦</div><div><div class="stat-label">Total Orders</div><div class="stat-value"><%= stats.total %></div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏳</div><div><div class="stat-label">Pending Capture</div><div class="stat-value"><%= stats.pending %></div></div></div>
+        <div class="stat-card"><div class="stat-icon green">🚚</div><div><div class="stat-label">Dispatched</div><div class="stat-value"><%= stats.dispatched %></div></div></div>
+        <div class="stat-card"><div class="stat-icon teal">✅</div><div><div class="stat-label">Delivered</div><div class="stat-value"><%= stats.delivered %></div></div></div>
       </div>
 
-      <!-- Filter bar + New Invoice button -->
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
-        <form method="GET" action="/dispatch" class="filter-bar" style="flex:1;margin-bottom:0;">
-          <div class="search-wrap">
-            <input class="search-input" type="text" name="search" value="<%= search %>" placeholder="Search invoice, customer, account...">
-          </div>
-          <select class="form-control" name="delivery" style="width:auto;">
-            <option value="">All Delivery Methods</option>
-            <option value="ICC Truck" <%= delivery==='ICC Truck'?'selected':'' %>>ICC Truck</option>
-            <option value="Courier" <%= delivery==='Courier'?'selected':'' %>>Courier</option>
-            <option value="Collection" <%= delivery==='Collection'?'selected':'' %>>Collection</option>
-          </select>
-          <select class="form-control" name="status" style="width:auto;">
-            <option value="">All Statuses</option>
-            <option value="pending" <%= status==='pending'?'selected':'' %>>Pending</option>
-            <option value="complete" <%= status==='complete'?'selected':'' %>>Complete</option>
-          </select>
-          <button type="submit" class="btn btn-blue btn-sm">Search</button>
-          <a href="/dispatch" class="btn btn-outline btn-sm">Clear</a>
-        </form>
-        <a href="/dispatch/new" class="btn btn-blue" style="white-space:nowrap;flex-shrink:0;">➕ New Invoice</a>
-      </div>
+      <form method="GET" action="/dispatch" class="filter-bar">
+        <div class="search-wrap"><input class="search-input" type="text" name="search" value="<%= search %>" placeholder="Search invoice, customer..."></div>
+        <select class="form-control" name="delivery" style="width:auto;">
+          <option value="">All Methods</option>
+          <option value="ICC Truck" <%=delivery==='ICC Truck'?'selected':''%>>ICC Truck</option>
+          <option value="Courier" <%=delivery==='Courier'?'selected':''%>>Courier</option>
+          <option value="Collection" <%=delivery==='Collection'?'selected':''%>>Collection</option>
+        </select>
+        <button type="submit" class="btn btn-blue btn-sm">Search</button>
+        <a href="/dispatch" class="btn btn-outline btn-sm">Clear</a>
+      </form>
 
+      <!-- PENDING ORDERS -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">📋 Dispatch Orders</span>
-          <span style="font-size:12px;color:var(--dark-grey);">Signed in as: <strong style="color:var(--medium-blue);"><%= user.name %></strong></span>
+          <span class="card-title">📋 Pending Dispatch Orders <span class="badge badge-warning"><%= dispatches.length %></span></span>
+          <span style="font-size:12px;color:var(--dark-grey);">Click <strong>Capture</strong> to add transport details · <strong>Receipt</strong> to confirm delivery</span>
         </div>
         <div class="table-wrapper">
           <table>
-            <thead>
-              <tr>
-                <th>Invoice #</th><th>Date</th><th>Account</th><th>Customer</th>
-                <th>Invoiced By</th><th>Packages</th><th>Delivery</th><th>Transport</th>
-                <th>Status</th><th>Media</th><th>Actions</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Packages</th><th>Delivery</th><th>Transport</th><th>Picker</th><th>Packer</th><th>Checker</th><th>Status</th><th>Capture</th><th>Receipt</th></tr></thead>
             <tbody>
               <% dispatches.forEach(d => { %>
-                <% const hasTransport = d.transport_company && d.transport_company.trim() !== ''; %>
-                <tr>
+                <% const hasTransport = d.transport_company && d.transport_company.trim()!==''; %>
+                <tr class="<%= d.dispatch_status==='dispatched'?'row-dispatched':'' %>">
                   <td><strong style="color:var(--deep-blue)">#<%= d.inv_number %></strong></td>
-                  <td><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
-                  <td><span class="text-muted small"><%= d.acc_no %></span></td>
-                  <td class="truncate" title="<%= d.acc_name %>"><%= d.acc_name %></td>
-                  <td><%= d.invoiced_by || '—' %></td>
-                  <td class="small"><%= d.total_packages || '—' %></td>
+                  <td class="nowrap"><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
+                  <td class="truncate" style="max-width:150px;" title="<%= d.acc_name %>"><%= d.acc_name %></td>
+                  <td class="small"><%= d.total_packages||'—' %></td>
                   <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
-                  <td>
+                  <td class="small">
                     <% if (hasTransport) { %>
-                      <div class="small"><strong><%= d.transport_company %></strong></div>
-                      <div class="text-muted small"><%= d.driver_first_name %> <%= d.driver_surname %></div>
-                    <% } else { %>
-                      <span class="text-muted">—</span>
-                    <% } %>
+                      <strong><%= d.transport_company %></strong><br>
+                      <span class="text-muted"><%= d.driver_first_name %> <%= d.driver_surname %></span>
+                    <% } else { %><span class="text-muted">—</span><% } %>
                   </td>
-                  <td>
-                    <% if (hasTransport) { %>
-                      <span class="badge badge-success">✔ Complete</span>
-                    <% } else { %>
-                      <span class="badge badge-warning">⏳ Pending</span>
-                    <% } %>
-                  </td>
-                  <td>
-                    <a href="/dispatch/capture/<%= d.inv_number %>" class="btn btn-outline btn-sm" title="Upload goods photos/videos">📸</a>
-                  </td>
-                  <td style="white-space:nowrap;">
-                    <a href="/dispatch/capture/<%= d.inv_number %>" class="btn btn-blue btn-sm">
-                      <%= hasTransport ? '✏ Edit' : '➕ Add' %>
-                    </a>
-                    <a href="/receipts/new/<%= d.inv_number %>" class="btn btn-sm btn-outline" style="margin-left:4px;">🧾 Receipt</a>
-                  </td>
+                  <td class="small"><%= d.picker||'—' %></td>
+                  <td class="small"><%= d.packer||'—' %></td>
+                  <td class="small"><%= d.checker||'—' %></td>
+                  <td><span class="badge <%=hasTransport?'badge-success':'badge-warning'%>"><%=d.dispatch_status==='dispatched'?'🚚 Out':'⏳ Pending'%></span></td>
+                  <td><a href="/dispatch/capture/<%= d.inv_number %>" class="btn btn-blue btn-sm"><%= hasTransport?'✏ Edit':'➕ Capture' %></a></td>
+                  <td><a href="/receipts/new/<%= d.inv_number %>" class="btn btn-sm btn-outline">🧾</a></td>
                 </tr>
               <% }) %>
-              <% if (dispatches.length === 0) { %>
-                <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--dark-grey);">No dispatch records found.</td></tr>
+              <% if (dispatches.length===0) { %>
+                <tr><td colspan="12" style="text-align:center;padding:30px;color:var(--dark-grey);">No pending orders. 🎉</td></tr>
               <% } %>
             </tbody>
           </table>
         </div>
       </div>
 
+      <!-- COMPLETED ORDERS -->
+      <% if (completed.length > 0) { %>
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header">
+          <span class="card-title" style="color:var(--success);">✅ Completed Deliveries <span class="badge badge-success"><%= completed.length %></span></span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Packages</th><th>Delivery</th><th>Driver/Transport</th><th>Captured By</th><th>Receipt</th></tr></thead>
+            <tbody>
+              <% completed.forEach(d => { %>
+                <tr style="opacity:0.8;">
+                  <td><strong style="color:var(--success)">#<%= d.inv_number %></strong></td>
+                  <td class="nowrap"><%= d.inv_date ? new Date(d.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
+                  <td class="truncate" style="max-width:150px;"><%= d.acc_name %></td>
+                  <td class="small"><%= d.total_packages||'—' %></td>
+                  <td><span class="badge badge-info"><%= d.delivery_method %></span></td>
+                  <td class="small"><%= d.transport_company||d.truck_name||'—' %></td>
+                  <td class="small"><strong><%= d.captured_by||'—' %></strong></td>
+                  <td><a href="/receipts/new/<%= d.inv_number %>" class="btn btn-sm btn-outline">🧾 View</a></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <% } %>
+
     </div>
   </div>
 </div>
 <script src="/js/app.js"></script>
-</body>
-</html>
+</body></html>

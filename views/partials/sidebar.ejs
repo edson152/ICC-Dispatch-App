@@ -2,52 +2,33 @@
   <div class="sidebar-logo">
     <img src="/images/logo.jpg" alt="ICC Logo" class="sidebar-logo-img">
   </div>
-
   <div class="sidebar-user">
-    <div class="user-role"><%= user.role === 'admin' ? '⚙ Administrator' : '👤 ' + user.empRole %></div>
+    <div class="user-role"><%= user.role === 'admin' ? '⚙ Administrator' : '👤 ' + (user.empRole||'Employee') %></div>
     <div class="user-name"><%= user.name %></div>
   </div>
-
   <nav class="sidebar-nav">
     <% if (user.role === 'admin') { %>
       <div class="nav-section-label">Overview</div>
-      <a href="/admin/dashboard" class="nav-item <%= title.includes('Dashboard') ? 'active' : '' %>">
-        <span class="nav-icon">📊</span> Dashboard
-      </a>
+      <a href="/admin/dashboard" class="nav-item <%= title.includes('Dashboard') ? 'active' : '' %>"><span class="nav-icon">📊</span> Dashboard</a>
       <div class="nav-section-label">Operations</div>
-      <a href="/admin/dispatches" class="nav-item <%= title.includes('Dispatch Records') ? 'active' : '' %>">
-        <span class="nav-icon">📦</span> Dispatch Records
-      </a>
-      <a href="/admin/receipts" class="nav-item <%= title.includes('Delivery Receipts') ? 'active' : '' %>">
-        <span class="nav-icon">🧾</span> Delivery Receipts
-      </a>
+      <a href="/admin/dispatches" class="nav-item <%= title.includes('Dispatch Records') ? 'active' : '' %>"><span class="nav-icon">📦</span> Dispatch Records</a>
+      <a href="/admin/receipts" class="nav-item <%= title.includes('Delivery Receipts') ? 'active' : '' %>"><span class="nav-icon">🧾</span> Delivery Receipts</a>
+      <a href="/trucks" class="nav-item <%= title.includes('Fleet') ? 'active' : '' %>"><span class="nav-icon">🚛</span> Fleet Management</a>
       <div class="nav-section-label">Administration</div>
-      <a href="/employees" class="nav-item <%= title.includes('Employee') ? 'active' : '' %>">
-        <span class="nav-icon">👥</span> Employees
-      </a>
-      <a href="/admin/reports" class="nav-item <%= title.includes('Reports') ? 'active' : '' %>">
-        <span class="nav-icon">📈</span> Reports
-      </a>
-      <a href="/admin/audit-log" class="nav-item <%= title.includes('Audit Log') ? 'active' : '' %>">
-        <span class="nav-icon">🔍</span> Audit Log
-      </a>
-      <a href="/admin/export" class="nav-item">
-        <span class="nav-icon">⬇</span> Export CSV
-      </a>
+      <a href="/employees" class="nav-item <%= title.includes('Employee') ? 'active' : '' %>"><span class="nav-icon">👥</span> Employees</a>
+      <a href="/admin/reports" class="nav-item <%= title.includes('Reports') ? 'active' : '' %>"><span class="nav-icon">📈</span> Reports</a>
+      <a href="/admin/audit" class="nav-item <%= title.includes('Audit') ? 'active' : '' %>"><span class="nav-icon">📋</span> Audit Log</a>
+      <a href="/admin/settings" class="nav-item <%= title.includes('Settings') ? 'active' : '' %>"><span class="nav-icon">⚙</span> Settings</a>
+      <a href="/admin/export" class="nav-item"><span class="nav-icon">⬇</span> Export CSV</a>
     <% } else { %>
       <div class="nav-section-label">Dispatch</div>
-      <a href="/dispatch/new" class="nav-item <%= title.includes('Add New Invoice') ? 'active' : '' %>" style="background:linear-gradient(135deg,#1A4A9C,#0D2B5E);color:white;border-radius:8px;margin-bottom:4px;">
-        <span class="nav-icon">➕</span> New Invoice
-      </a>
       <a href="/dispatch" class="nav-item <%= title.includes('Dispatch Orders') ? 'active' : '' %>">
         <span class="nav-icon">📋</span> Dispatch Orders
+        <% if (pendingCount > 0) { %><span class="notif-bell"><%= pendingCount %></span><% } %>
       </a>
-      <a href="/receipts" class="nav-item <%= title.includes('Receipt') ? 'active' : '' %>">
-        <span class="nav-icon">🧾</span> Delivery Receipts
-      </a>
+      <a href="/receipts" class="nav-item <%= title.includes('Receipt') ? 'active' : '' %>"><span class="nav-icon">🧾</span> Delivery Receipts</a>
     <% } %>
   </nav>
-
   <div class="sidebar-footer">
     <form method="POST" action="/logout">
       <button type="submit" class="btn-logout">⬅ Sign Out</button>

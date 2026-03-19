@@ -4,61 +4,52 @@
   <div class="main-content">
     <%- include('../partials/topbar') %>
     <div class="page-body">
-
+      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
       <div class="card">
         <div class="card-header">
-          <span class="card-title">🧾 All Delivery Receipts (<%= receipts.length %>)</span>
-          <span style="font-size:12px;color:var(--dark-grey);">Admin can <strong>Edit</strong> or <strong>Delete</strong> any receipt</span>
+          <span class="card-title">🧾 Delivery Receipts</span>
+          <span style="font-size:12px;color:var(--dark-grey);"><%= total %> total · Page <%= page %> of <%= totalPages %></span>
         </div>
         <div class="table-wrapper" style="overflow-x:auto;">
-          <table style="min-width:1100px;">
-            <thead>
-              <tr>
-                <th>Receipt #</th><th>Invoice #</th><th>Customer</th><th>Email</th>
-                <th>Receipt Date</th><th>Received By</th><th>Condition</th>
-                <th>Transport Co.</th><th>Tracking #</th><th>Notes</th>
-                <th>Captured By</th><th>Captured At</th><th>Actions</th>
-              </tr>
-            </thead>
+          <table style="min-width:1000px;">
+            <thead><tr>
+              <th>Receipt #</th><th>Invoice #</th><th>Customer</th><th>Date</th>
+              <th>Received By</th><th>Condition</th><th>Picker</th><th>Packer</th><th>Checker</th>
+              <th>Captured By</th><th>Captured At</th>
+            </tr></thead>
             <tbody>
               <% receipts.forEach(r => { %>
                 <tr>
                   <td><strong style="color:var(--deep-blue)">#<%= r.id %></strong></td>
                   <td><a href="/receipts/view/<%= r.id %>" style="color:var(--medium-blue);font-weight:600;">#<%= r.inv_number %></a></td>
-                  <td class="truncate" style="max-width:150px;" title="<%= r.acc_name %>"><%= r.acc_name %></td>
-                  <td class="small text-muted"><%= r.customer_email || '—' %></td>
+                  <td class="truncate" style="max-width:140px;" title="<%= r.acc_name %>"><%= r.acc_name %></td>
                   <td class="nowrap"><%= r.receipt_date ? new Date(r.receipt_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></td>
-                  <td><%= r.received_by || '—' %></td>
-                  <td>
-                    <span class="badge <%= r.condition==='Good'?'badge-success':r.condition==='Damaged'?'badge-danger':'badge-warning' %>">
-                      <%= r.condition %>
-                    </span>
-                  </td>
-                  <td><%= r.transport_company || '—' %></td>
-                  <td class="small"><%= r.tracking_number || '—' %></td>
-                  <td class="small text-muted"><%= r.notes ? r.notes.substring(0,40)+(r.notes.length>40?'...':'') : '—' %></td>
+                  <td><%= r.received_by||'—' %></td>
+                  <td><span class="badge <%=r.condition==='Good'?'badge-success':r.condition==='Damaged'?'badge-danger':'badge-warning'%>"><%= r.condition %></span></td>
+                  <td class="small"><%= r.picker||'—' %></td>
+                  <td class="small"><%= r.packer||'—' %></td>
+                  <td class="small"><%= r.checker||'—' %></td>
                   <td><strong style="color:var(--medium-blue)"><%= r.captured_by %></strong></td>
                   <td class="small nowrap"><%= r.captured_at ? new Date(r.captured_at).toLocaleString('en-ZA') : '—' %></td>
-                  <td style="white-space:nowrap;">
-                    <a href="/admin/receipts/edit/<%= r.id %>" class="btn btn-blue btn-sm">✏ Edit</a>
-                    <form method="POST" action="/admin/receipts/<%= r.id %>?_method=DELETE" onsubmit="return confirm('Delete Receipt #<%= r.id %>? This cannot be undone.');" style="display:inline-block;margin-left:4px;">
-                      <input type="hidden" name="_method" value="DELETE">
-                      <button type="submit" class="btn btn-sm" style="background:#e53e3e;color:white;">🗑</button>
-                    </form>
-                  </td>
                 </tr>
               <% }) %>
-              <% if (receipts.length === 0) { %>
-                <tr><td colspan="13" style="text-align:center;padding:40px;color:var(--dark-grey);">No receipts found.</td></tr>
+              <% if (receipts.length===0) { %>
+                <tr><td colspan="11" style="text-align:center;padding:30px;color:var(--dark-grey);">No receipts found.</td></tr>
               <% } %>
             </tbody>
           </table>
         </div>
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div style="display:flex;justify-content:center;gap:8px;padding:16px;">
+            <% for(let p=1;p<=totalPages;p++) { %>
+              <a href="/admin/receipts?page=<%= p %>" class="btn btn-sm <%= p===page?'btn-blue':'btn-outline' %>"><%= p %></a>
+            <% } %>
+          </div>
+        <% } %>
       </div>
-
     </div>
   </div>
 </div>
 <script src="/js/app.js"></script>
-</body>
-</html>
+</body></html>

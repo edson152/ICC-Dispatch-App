@@ -4,141 +4,202 @@
   <div class="main-content">
     <%- include('../partials/topbar') %>
     <div class="page-body">
-      <div style="margin-bottom:16px;">
-        <a href="/dispatch" class="btn btn-outline btn-sm">← Back to Dispatch Orders</a>
+      <div style="margin-bottom:16px;"><a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a></div>
+
+      <!-- Invoice Lookup -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body" style="padding:16px 22px;">
+          <div style="display:flex;gap:12px;align-items:flex-end;">
+            <div style="flex:1;">
+              <label style="font-size:11px;font-weight:700;color:var(--deep-blue);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Quick Lookup — Type Invoice Number</label>
+              <input type="text" id="invoiceLookup" class="form-control" placeholder="e.g. 776691" style="max-width:300px;" value="<%= dispatch.inv_number %>">
+            </div>
+            <button type="button" class="btn btn-blue btn-sm" onclick="lookupInvoice()">🔍 Lookup</button>
+          </div>
+        </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <span class="card-title">📝 Capture / Edit — Invoice #<%= dispatch.inv_number %></span>
-          <span style="font-size:12px;color:var(--dark-grey);">Editing as: <strong style="color:var(--medium-blue);"><%= user.name %></strong></span>
+          <span class="card-title">📝 Capture Transport Details — Invoice #<%= dispatch.inv_number %></span>
+          <span style="font-size:12px;color:var(--dark-grey);">By: <strong><%= user.name %></strong> · <span class="badge <%=dispatch.dispatch_status==='delivered'?'badge-success':dispatch.dispatch_status==='dispatched'?'badge-info':'badge-warning'%>"><%= dispatch.dispatch_status||'pending' %></span></span>
         </div>
         <div class="card-body">
 
-          <!-- Capturer banner -->
-          <div style="background:linear-gradient(135deg,#EBF8FF,#E6FFFA);border:1px solid #90CDF4;border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:13px;color:#2b6cb0;">
-            ✏️ <strong>Editing by:</strong> <strong style="color:var(--deep-blue);"><%= user.name %></strong> — all changes will be logged automatically.
-          </div>
-
-          <!-- Invoice Info -->
-          <div class="section-title">📄 Invoice Information</div>
-          <div class="detail-grid">
+          <!-- Read-only invoice info (from Sage/DB — no editing) -->
+          <div class="section-title">📄 Invoice Information <span style="font-size:10px;color:var(--dark-grey);font-weight:400;text-transform:none;letter-spacing:0;">(read-only — pulled from database)</span></div>
+          <div class="detail-grid" style="margin-bottom:24px;">
             <div class="detail-field highlight"><label>Invoice #</label><span>#<%= dispatch.inv_number %></span></div>
-            <div class="detail-field highlight"><label>Date</label><span><%= dispatch.inv_date ? new Date(dispatch.inv_date).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'}) : '—' %></span></div>
-            <div class="detail-field"><label>Order #</label><span><%= dispatch.order_num || '—' %></span></div>
-            <div class="detail-field"><label>Account No</label><span><%= dispatch.acc_no || '—' %></span></div>
-            <div class="detail-field" style="grid-column:span 2;"><label>Customer Name</label><span><%= dispatch.acc_name || '—' %></span></div>
-            <div class="detail-field"><label>Email</label><span><%= dispatch.email || '—' %></span></div>
+            <div class="detail-field highlight"><label>Date</label><span><%= dispatch.inv_date ? new Date(dispatch.inv_date).toLocaleDateString('en-ZA') : '—' %></span></div>
+            <div class="detail-field highlight"><label>Order #</label><span><%= dispatch.order_num||'—' %></span></div>
+            <div class="detail-field" style="grid-column:span 2;"><label>Customer Name</label><span><%= dispatch.acc_name||'—' %></span></div>
+            <div class="detail-field" style="grid-column:span 2;"><label>Customer Address</label><span><%= dispatch.address ? dispatch.address + (dispatch.city?', '+dispatch.city:'') : '—' %></span></div>
+            <div class="detail-field"><label>Email</label><span><%= dispatch.email||'—' %></span></div>
+            <div class="detail-field"><label>Phone</label><span><%= dispatch.phone||'—' %></span></div>
             <div class="detail-field"><label>Delivery Method</label><span><span class="badge badge-info"><%= dispatch.delivery_method %></span></span></div>
-            <div class="detail-field"><label>Packages</label><span><%= dispatch.total_packages || '—' %></span></div>
+            <div class="detail-field"><label>Invoiced By</label><span><%= dispatch.invoiced_by||'—' %></span></div>
+            <div class="detail-field"><label>Picker</label><span><%= dispatch.picker||'—' %></span></div>
+            <div class="detail-field"><label>Packer</label><span><%= dispatch.packer||'—' %></span></div>
+            <div class="detail-field"><label>Checker</label><span><%= dispatch.checker||'—' %></span></div>
+            <div class="detail-field"><label>Weight</label><span><%= dispatch.weight ? dispatch.weight+' kg' : '—' %></span></div>
+            <div class="detail-field"><label>Bales</label><span><%= dispatch.bales||0 %></span></div>
+            <div class="detail-field"><label>Boxes</label><span><%= dispatch.boxes||0 %></span></div>
+            <div class="detail-field"><label>Grey Bags</label><span><%= dispatch.grey_bags||0 %></span></div>
+            <div class="detail-field" style="grid-column:span 2;"><label>Total Packages</label><span><%= dispatch.total_packages||'—' %></span></div>
             <div class="detail-field"><label>Invoice Total (Excl)</label><span style="color:var(--medium-blue);font-weight:700;">R <%= dispatch.inv_tot_excl ? parseFloat(dispatch.inv_tot_excl).toLocaleString('en-ZA',{minimumFractionDigits:2}) : '0.00' %></span></div>
           </div>
 
           <hr class="section-divider">
 
-          <!-- Transport + Media Upload Form -->
-          <div class="section-title">🚛 Transport Details &amp; Goods Media Upload</div>
+          <!-- Transport form (editable) -->
           <form method="POST" action="/dispatch/capture/<%= dispatch.inv_number %>" enctype="multipart/form-data">
+            <div class="section-title">🚛 Transport / Courier Details</div>
+
+            <!-- Delivery method specific -->
+            <% if (dispatch.delivery_method === 'ICC Truck') { %>
+              <div class="form-row">
+                <label>Select ICC Truck</label>
+                <select class="form-control" name="icc_truck_id" id="truckSelect" onchange="loadTruckDetails(this.value)" style="max-width:400px;">
+                  <option value="">— Select a truck —</option>
+                  <% trucks.forEach(t => { %>
+                    <option value="<%= t.id %>" <%=dispatch.icc_truck_id==t.id?'selected':'' %>>
+                      <%= t.truck_name %> — <%= t.license_plate %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+            <% } %>
+
             <div class="form-grid">
+              <% if (dispatch.delivery_method !== 'ICC Truck') { %>
               <div class="form-row">
                 <label>Transport / Courier Company</label>
-                <input class="form-control" name="transport_company" value="<%= dispatch.transport_company || '' %>" placeholder="e.g. DHL, Fastway, ICC Truck">
+                <input class="form-control" name="transport_company" id="f_transport" value="<%= dispatch.transport_company||'' %>" placeholder="e.g. DHL, Fastway, Skynet">
               </div>
+              <% } else { %>
+                <input type="hidden" name="transport_company" value="ICC Truck">
+              <% } %>
               <div class="form-row">
                 <label>Driver First Name</label>
-                <input class="form-control" name="driver_first_name" value="<%= dispatch.driver_first_name || '' %>" placeholder="Driver's first name">
+                <input class="form-control" name="driver_first_name" id="f_driver_first" value="<%= dispatch.driver_first_name||'' %>" placeholder="Driver first name">
               </div>
               <div class="form-row">
                 <label>Driver Surname</label>
-                <input class="form-control" name="driver_surname" value="<%= dispatch.driver_surname || '' %>" placeholder="Driver's surname">
+                <input class="form-control" name="driver_surname" id="f_driver_sur" value="<%= dispatch.driver_surname||'' %>" placeholder="Driver surname">
               </div>
               <div class="form-row">
-                <label>License Plate</label>
-                <input class="form-control" name="license_plate" value="<%= dispatch.license_plate || '' %>" placeholder="e.g. ABC 123 GP" style="text-transform:uppercase;">
+                <label>Driver Phone</label>
+                <input class="form-control" name="driver_phone" id="f_driver_phone" value="<%= dispatch.driver_phone||'' %>" placeholder="+27 xx xxx xxxx">
+              </div>
+              <div class="form-row">
+                <label>License Plate <span id="plateHint" style="font-size:10px;color:var(--dark-grey);font-weight:400;"></span></label>
+                <input class="form-control" name="license_plate" id="f_plate" value="<%= dispatch.license_plate||'' %>" placeholder="e.g. ABC 123 GP" oninput="validatePlate(this)" style="text-transform:uppercase;" autocomplete="off">
+                <div id="plateError" style="color:var(--danger);font-size:12px;margin-top:4px;display:none;">⚠ Invalid plate format. Check province/format.</div>
               </div>
               <div class="form-row">
                 <label>Tracking / Waybill Number</label>
-                <input class="form-control" name="tracking_number" value="<%= dispatch.tracking_number || '' %>" placeholder="Enter tracking or waybill number">
+                <input class="form-control" name="tracking_number" value="<%= dispatch.tracking_number||'' %>" placeholder="Tracking or waybill number">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label>Notes</label>
+              <textarea class="form-control" name="notes" rows="2" placeholder="Any additional notes..."><%= dispatch.notes||'' %></textarea>
+            </div>
+
+            <hr class="section-divider">
+            <div class="section-title">📷 Photos <span style="font-size:10px;color:var(--dark-grey);font-weight:400;text-transform:none;"><%= settings.require_goods_photo==='true' ? '(Required)' : '(Optional)' %></span></div>
+
+            <div class="form-grid">
+              <div class="form-row">
+                <label>Goods / Parcel Photos <%= settings.require_goods_photo==='true' ? '*' : '' %></label>
+                <input type="file" name="goods_photos" class="form-control" accept="image/*,video/*" multiple>
+                <div style="font-size:11px;color:var(--dark-grey);margin-top:4px;">Up to 5 photos/videos of the goods being dispatched</div>
               </div>
               <div class="form-row">
-                <label>Notes</label>
-                <input class="form-control" name="notes" value="<%= dispatch.notes || '' %>" placeholder="Any additional notes">
+                <label>Driver's License Photo <%= settings.require_license_photo==='true' ? '*' : '' %></label>
+                <input type="file" name="license_photo" class="form-control" accept="image/*">
+              </div>
+              <div class="form-row">
+                <label>Driver Photo <%= settings.require_driver_photo==='true' ? '*' : '' %></label>
+                <input type="file" name="driver_photo_upload" class="form-control" accept="image/*">
               </div>
             </div>
 
-            <!-- Media Upload Section -->
-            <div style="margin:20px 0;background:var(--soft-grey);border-radius:10px;padding:20px;">
-              <div style="font-weight:700;color:var(--deep-blue);margin-bottom:8px;font-size:14px;">📸📹 Upload Goods Photos / Videos / Receipt Images</div>
-              <p style="font-size:12px;color:var(--dark-grey);margin:0 0 12px;">Photos/videos will be sent to the customer and visible to admin. Max 50MB per file. Accepted: JPG, PNG, MP4, MOV, PDF.</p>
-              <input type="file" name="goods_media" multiple accept="image/*,video/*,.pdf" class="form-control" style="background:white;">
-              <p style="font-size:11px;color:var(--dark-grey);margin:6px 0 0;">You can select multiple files at once. 📧 Photos will be automatically emailed to the customer and admin.</p>
-            </div>
+            <% if (media && media.length > 0) { %>
+              <div style="margin:16px 0;">
+                <div class="section-title" style="margin-bottom:10px;">🗂 Previously Uploaded Files</div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                  <% media.forEach(m => { %>
+                    <div style="border:1px solid var(--mid-grey);border-radius:8px;padding:8px;font-size:11px;text-align:center;width:100px;">
+                      <% if (/image/i.test(m.mime_type)) { %>
+                        <img src="/uploads/<%= m.media_type==='goods'?'goods':m.media_type==='license'?'licenses':'drivers' %>/<%= m.file_name %>" style="width:80px;height:60px;object-fit:cover;border-radius:4px;display:block;margin-bottom:4px;">
+                      <% } else { %>
+                        <div style="width:80px;height:60px;background:var(--soft-grey);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:4px;">📄</div>
+                      <% } %>
+                      <span class="badge badge-info"><%= m.media_type %></span>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            <% } %>
 
             <% if (dispatch.captured_by) { %>
-              <div style="background:var(--soft-grey);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--dark-grey);">
+              <div style="background:var(--soft-grey);border-radius:8px;padding:10px 14px;margin:16px 0;font-size:12px;color:var(--dark-grey);">
                 Previously captured by <strong><%= dispatch.captured_by %></strong><% if (dispatch.captured_at) { %> on <%= new Date(dispatch.captured_at).toLocaleString('en-ZA') %><% } %>
               </div>
             <% } %>
 
-            <div style="display:flex;gap:12px;">
-              <button type="submit" class="btn btn-blue">💾 Save &amp; Upload — Notify Admin &amp; Customer</button>
-              <a href="/dispatch" class="btn btn-outline">Cancel</a>
+            <div style="display:flex;gap:12px;margin-top:8px;">
+              <button type="submit" class="btn btn-blue">💾 Save Transport Details</button>
+              <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
             </div>
           </form>
-
-          <!-- Existing Media Gallery -->
-          <% if (media && media.length > 0) { %>
-            <hr class="section-divider">
-            <div class="section-title">🖼️ Uploaded Goods Media (<%= media.length %> files)</div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px;">
-              <% media.forEach(m => { %>
-                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;">
-                  <% if (m.mime_type && m.mime_type.startsWith('image/')) { %>
-                    <a href="/uploads/goods/<%= m.file_name %>" target="_blank">
-                      <img src="/uploads/goods/<%= m.file_name %>" style="width:100%;height:120px;object-fit:cover;" alt="<%= m.original_name %>">
-                    </a>
-                  <% } else if (m.mime_type && m.mime_type.startsWith('video/')) { %>
-                    <video style="width:100%;height:120px;object-fit:cover;" controls>
-                      <source src="/uploads/goods/<%= m.file_name %>" type="<%= m.mime_type %>">
-                    </video>
-                  <% } else { %>
-                    <a href="/uploads/goods/<%= m.file_name %>" target="_blank" style="display:block;padding:30px;font-size:32px;">📄</a>
-                  <% } %>
-                  <div style="padding:8px;font-size:11px;color:var(--dark-grey);">
-                    <div style="font-weight:600;word-break:break-all;" title="<%= m.original_name %>"><%= m.original_name.length > 20 ? m.original_name.substring(0,18)+'...' : m.original_name %></div>
-                    <div>By: <%= m.uploaded_by %></div>
-                    <form method="POST" action="/dispatch/media/delete/<%= m.id %>" onsubmit="return confirm('Remove this file?');" style="margin-top:4px;">
-                      <button type="submit" style="background:none;border:none;color:#e53e3e;cursor:pointer;font-size:11px;text-decoration:underline;">🗑 Remove</button>
-                    </form>
-                  </div>
-                </div>
-              <% }) %>
-            </div>
-          <% } %>
-
-          <!-- Edit Log -->
-          <% if (editLog && editLog.length > 0) { %>
-            <hr class="section-divider">
-            <div class="section-title">📋 Edit History (Audit Trail)</div>
-            <div style="background:var(--soft-grey);border-radius:8px;padding:12px;font-size:12px;">
-              <% editLog.forEach(e => { %>
-                <div style="padding:8px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:start;gap:8px;">
-                  <div>
-                    <strong style="color:var(--medium-blue);"><%= e.edited_by %></strong>
-                    <span style="color:var(--dark-grey);"> — <%= e.edit_type %></span>
-                    <% if (e.changes_detail) { %><div style="color:#4a5568;margin-top:2px;"><%= e.changes_detail %></div><% } %>
-                  </div>
-                  <div style="color:var(--dark-grey);white-space:nowrap;"><%= new Date(e.edited_at).toLocaleString('en-ZA') %></div>
-                </div>
-              <% }) %>
-            </div>
-          <% } %>
 
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+// SA/SADC plate validation
+const PLATE_PATTERNS = [
+  /^[A-Z]{3}\s?\d{3}\s?[A-Z]{2}$/,
+  /^[A-Z]{2}\s?\d{2}\s?[A-Z]{2}$/,
+  /^[A-Z]{1,3}\s?\d{1,4}$/,
+  /^ICC[-\s]?\d{1,4}$/i,
+  /^[A-Z0-9]{2,10}$/
+];
+function validatePlate(input) {
+  input.value = input.value.toUpperCase();
+  const val = input.value.trim();
+  const valid = !val || PLATE_PATTERNS.some(p => p.test(val));
+  document.getElementById('plateError').style.display = valid ? 'none' : 'block';
+  input.style.borderColor = valid ? '' : 'var(--danger)';
+}
+
+// Load truck details via API
+async function loadTruckDetails(id) {
+  if (!id) return;
+  const r = await fetch('/trucks/api/'+id);
+  const data = await r.json();
+  if (data.error) return;
+  document.getElementById('f_driver_first').value = data.driver_first_name||'';
+  document.getElementById('f_driver_sur').value = data.driver_surname||'';
+  document.getElementById('f_driver_phone').value = data.driver_phone||'';
+  document.getElementById('f_plate').value = data.license_plate||'';
+}
+
+// Invoice lookup
+async function lookupInvoice() {
+  const num = document.getElementById('invoiceLookup').value.trim();
+  if (!num) return;
+  window.location.href = '/dispatch/capture/'+num;
+}
+document.getElementById('invoiceLookup').addEventListener('keydown', e => {
+  if (e.key==='Enter') { e.preventDefault(); lookupInvoice(); }
+});
+</script>
 <script src="/js/app.js"></script>
-</body>
-</html>
+</body></html>

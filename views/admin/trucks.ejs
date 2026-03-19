@@ -1,0 +1,97 @@
+<%- include('../partials/head') %>
+<div class="app-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/topbar') %>
+    <div class="page-body">
+      <div style="margin-bottom:16px;display:flex;gap:12px;align-items:center;">
+        <a href="javascript:history.back()" class="btn btn-outline btn-sm">← Back</a>
+        <button class="btn btn-blue" onclick="openModal('addTruckModal')">➕ Add Truck to Fleet</button>
+      </div>
+
+      <div class="employee-grid">
+        <% trucks.forEach(t => { %>
+          <div class="employee-card <%= !t.is_active?'inactive':'' %>">
+            <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--deep-blue),var(--light-blue));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🚛</div>
+            <div class="emp-info">
+              <div class="emp-name"><%= t.truck_name %></div>
+              <div class="emp-role"><%= t.license_plate %></div>
+              <div style="font-size:11px;color:var(--dark-grey);margin-top:2px;"><%= t.driver_name %> <%= t.driver_surname||'' %> <%= t.driver_phone?'· '+t.driver_phone:'' %></div>
+              <% if (!t.is_active) { %><span class="badge badge-danger" style="margin-top:4px;">Inactive</span><% } %>
+            </div>
+            <div class="emp-actions" style="flex-direction:column;gap:4px;">
+              <a href="/trucks/<%= t.id %>" class="btn btn-sm btn-outline">📋 Detail</a>
+              <form method="POST" action="/trucks/toggle/<%= t.id %>" style="margin:0;">
+                <button type="submit" class="btn btn-sm <%= t.is_active?'btn-warning':'btn-success' %>" style="width:100%;">
+                  <%= t.is_active?'⏸ Deactivate':'▶ Activate' %>
+                </button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+        <% if (trucks.length===0) { %>
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--dark-grey);">No trucks in fleet yet. Add your first truck above.</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Truck Modal -->
+<div class="modal-overlay" id="addTruckModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <div class="modal-title">🚛 Add Truck to Fleet</div>
+      <button class="btn-close" onclick="closeModal('addTruckModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form method="POST" action="/trucks/add" enctype="multipart/form-data">
+        <div class="form-grid">
+          <div class="form-row">
+            <label class="required">Truck Name / ID</label>
+            <input class="form-control" name="truck_name" placeholder="e.g. ICC Truck 1, Big Blue" required>
+          </div>
+          <div class="form-row">
+            <label class="required">License Plate</label>
+            <input class="form-control" name="license_plate" placeholder="e.g. ABC 123 GP" style="text-transform:uppercase;" required>
+          </div>
+          <div class="form-row">
+            <label>Driver First Name</label>
+            <input class="form-control" name="driver_name" placeholder="First name">
+          </div>
+          <div class="form-row">
+            <label>Driver Surname</label>
+            <input class="form-control" name="driver_surname" placeholder="Surname">
+          </div>
+          <div class="form-row">
+            <label>Driver Phone</label>
+            <input class="form-control" name="driver_phone" placeholder="+27 xx xxx xxxx">
+          </div>
+          <div class="form-row">
+            <label>Driver ID Number</label>
+            <input class="form-control" name="driver_id_number" placeholder="SA ID number">
+          </div>
+          <div class="form-row">
+            <label>Driver Photo</label>
+            <input type="file" class="form-control" name="driver_photo" accept="image/*">
+          </div>
+          <div class="form-row">
+            <label>Driver License Photo</label>
+            <input type="file" class="form-control" name="driver_license_photo" accept="image/*">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Notes</label>
+          <textarea class="form-control" name="notes" rows="2" placeholder="Any notes about this truck..."></textarea>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-blue">🚛 Add to Fleet</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('addTruckModal')">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+</body></html>

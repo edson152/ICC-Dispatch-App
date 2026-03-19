@@ -1,7 +1,7 @@
 {
   "name": "icc-dispatch-system",
-  "version": "1.0.0",
-  "description": "ICC Dispatch Management System",
+  "version": "4.0.0",
+  "description": "ICC Dispatch Management System v4",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
