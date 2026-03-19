@@ -1,5 +1,4 @@
--- ICC Dispatch Management System v4 — Full Schema + Migrations
--- Safe to run multiple times — uses IF NOT EXISTS and DO blocks
+-- ICC Dispatch Management System v4 — Full Schema
 
 CREATE TABLE IF NOT EXISTS employees (
   id SERIAL PRIMARY KEY,
@@ -20,6 +19,7 @@ CREATE TABLE IF NOT EXISTS admins (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- ICC owned trucks fleet
 CREATE TABLE IF NOT EXISTS icc_trucks (
   id SERIAL PRIMARY KEY,
   truck_name VARCHAR(100) NOT NULL,
@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS icc_trucks (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Admin-level settings (mandatory photos toggle etc)
 CREATE TABLE IF NOT EXISTS system_settings (
   key VARCHAR(100) PRIMARY KEY,
   value TEXT,
@@ -70,15 +71,17 @@ CREATE TABLE IF NOT EXISTS dispatch_records (
   total_packages VARCHAR(255),
   delivery_method VARCHAR(100),
   inv_tot_excl DECIMAL(12,2),
+  -- Transport (writable by employee)
   transport_company VARCHAR(150),
-  icc_truck_id INTEGER,
+  icc_truck_id INTEGER REFERENCES icc_trucks(id),
   driver_first_name VARCHAR(100),
   driver_surname VARCHAR(100),
   driver_phone VARCHAR(30),
   license_plate VARCHAR(30),
   tracking_number VARCHAR(100),
   notes TEXT,
-  dispatch_status VARCHAR(30) DEFAULT 'pending',
+  -- Status
+  dispatch_status VARCHAR(30) DEFAULT 'pending',  -- pending | dispatched | delivered
   sms_sent BOOLEAN DEFAULT FALSE,
   captured_by VARCHAR(100),
   captured_at TIMESTAMP,
@@ -86,77 +89,6 @@ CREATE TABLE IF NOT EXISTS dispatch_records (
   synced_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
-
--- ── MIGRATIONS: safely add new columns to existing tables ──────────────────
--- These DO blocks check if the column exists before adding it
--- Safe to run on both fresh installs and existing databases
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='icc_truck_id') THEN
-    ALTER TABLE dispatch_records ADD COLUMN icc_truck_id INTEGER;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='driver_phone') THEN
-    ALTER TABLE dispatch_records ADD COLUMN driver_phone VARCHAR(30);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='phone') THEN
-    ALTER TABLE dispatch_records ADD COLUMN phone VARCHAR(30);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='address') THEN
-    ALTER TABLE dispatch_records ADD COLUMN address TEXT;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='city') THEN
-    ALTER TABLE dispatch_records ADD COLUMN city VARCHAR(100);
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='dispatch_status') THEN
-    ALTER TABLE dispatch_records ADD COLUMN dispatch_status VARCHAR(30) DEFAULT 'pending';
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='sms_sent') THEN
-    ALTER TABLE dispatch_records ADD COLUMN sms_sent BOOLEAN DEFAULT FALSE;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dispatch_records' AND column_name='dispatched_at') THEN
-    ALTER TABLE dispatch_records ADD COLUMN dispatched_at TIMESTAMP;
-  END IF;
-END $$;
-
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='delivery_receipts' AND column_name='pod_scan_path') THEN
-    ALTER TABLE delivery_receipts ADD COLUMN pod_scan_path VARCHAR(255);
-  END IF;
-END $$;
-
--- Set dispatch_status on existing rows that have transport captured
-UPDATE dispatch_records
-SET dispatch_status = 'dispatched'
-WHERE dispatch_status IS NULL
-  AND transport_company IS NOT NULL
-  AND transport_company != '';
-
-UPDATE dispatch_records
-SET dispatch_status = 'pending'
-WHERE dispatch_status IS NULL;
-
--- ── END MIGRATIONS ──────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS delivery_receipts (
   id SERIAL PRIMARY KEY,
@@ -191,6 +123,7 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Default system settings
 INSERT INTO system_settings (key, value, updated_by) VALUES
   ('require_goods_photo', 'false', 'system'),
   ('require_driver_photo', 'false', 'system'),
