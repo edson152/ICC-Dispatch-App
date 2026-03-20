@@ -224,41 +224,7 @@ router.get('/customer-search', requireAdmin, async (req, res) => {
   res.render('admin/customer-search', { title: 'Customer Search', customers, search });
 });
 
-// Item 23: Value at risk report
-router.get('/value-at-risk', requireAdmin, async (req, res) => {
-  try {
-    const [atRisk, byMethod, recent] = await Promise.all([
-      db.query(`SELECT COUNT(*) as cnt, COALESCE(SUM(inv_tot_excl),0) as total_value, COALESCE(SUM(weight),0) as total_weight FROM dispatch_records WHERE dispatch_status='dispatched'`),
-      db.query(`SELECT delivery_method, COUNT(*) as cnt, COALESCE(SUM(inv_tot_excl),0) as total_value FROM dispatch_records WHERE dispatch_status='dispatched' GROUP BY delivery_method ORDER BY total_value DESC`),
-      db.query(`SELECT d.*,t.truck_name FROM dispatch_records d LEFT JOIN icc_trucks t ON d.icc_truck_id=t.id WHERE d.dispatch_status='dispatched' ORDER BY d.dispatched_at ASC`)
-    ]);
-    res.render('admin/value-at-risk', { title: 'Value at Risk', atRisk: atRisk.rows[0], byMethod: byMethod.rows, dispatches: recent.rows });
-  } catch(err) { console.error(err); res.redirect('/admin/dashboard'); }
-});
 
-// Item 22: Driver performance report
-router.get('/driver-performance', requireAdmin, async (req, res) => {
-  try {
-    const result = await db.query(`
-      SELECT
-        COALESCE(t.truck_name, d.transport_company, 'Unknown') as vehicle,
-        COALESCE(d.driver_first_name||' '||COALESCE(d.driver_surname,''), 'Unknown') as driver,
-        d.delivery_method,
-        COUNT(*) as total_deliveries,
-        COUNT(CASE WHEN d.dispatch_status='delivered' THEN 1 END) as completed,
-        COUNT(CASE WHEN d.dispatch_status='dispatched' THEN 1 END) as in_progress,
-        ROUND(AVG(CASE WHEN d.delivered_at IS NOT NULL AND d.dispatched_at IS NOT NULL
-          THEN EXTRACT(EPOCH FROM (d.delivered_at - d.dispatched_at))/3600 END)::numeric, 1) as avg_hours,
-        COALESCE(SUM(d.inv_tot_excl),0) as total_value
-      FROM dispatch_records d
-      LEFT JOIN icc_trucks t ON d.icc_truck_id = t.id
-      WHERE d.transport_company IS NOT NULL AND d.transport_company != ''
-      GROUP BY vehicle, driver, d.delivery_method
-      ORDER BY completed DESC
-    `);
-    res.render('admin/driver-performance', { title: 'Driver Performance', drivers: result.rows });
-  } catch(err) { console.error(err); res.redirect('/admin/reports'); }
-});
 
 // Item 24: Week-on-week comparison for dashboard
 router.get('/api/weekly-stats', requireAdmin, async (req, res) => {
